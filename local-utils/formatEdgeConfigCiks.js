@@ -16,7 +16,8 @@ async function formatEdgeConfigCiks() {
 	for (const key of Object.keys(data)) {
 		const { cik_str, ticker } = data[key];
 		if (!reitSet.has(ticker)) continue;
-		console.log(`    "${ticker}": "${cik_str}",`);
+		const formatted_cik_str = cik_str.toString().padStart(10, '0');
+		console.log(`    "${ticker}": "${formatted_cik_str}",`);
 	}
 	console.log('}');
 }
