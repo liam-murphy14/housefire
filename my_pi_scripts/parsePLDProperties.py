@@ -49,7 +49,7 @@ COLUMN_NAMES_MAP = {
     "Country": "country",
     "Latitude": "latitude",
     "Longitude": "longitude",
-    "Available Square Footage": "sqare_footage",
+    "Available Square Footage": "square_footage",
 }
 
 
