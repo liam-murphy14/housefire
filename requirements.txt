@@ -1,0 +1,4 @@
+pandas
+redis
+hiredis
+python-dotenv

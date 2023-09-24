@@ -17,3 +17,6 @@ vite.config.ts.timestamp-*
 **/.runtimeconfig.json
 */npm-debug.log
 .vercel
+.venv
+venv
+.vscode
