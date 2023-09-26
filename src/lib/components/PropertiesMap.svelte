@@ -1,35 +1,46 @@
 <script lang="ts">
-  let L;
+  import type { PropertyData } from '$lib/interfaces/PropertyData.interface';
+  import 'leaflet/dist/leaflet.css';
+  import { onMount } from 'svelte';
 
-  const startMap = async () => {
+  export let properties: PropertyData[] = [];
+
+  onMount(async () => {
     try {
-      // @ts-ignore
-      L = window.L;
-      // @ts-ignore
-      const map = L.map('map').setView([51.505, -0.09], 13);
-      // @ts-ignore
+      // import leaflet
+      const l = await import('leaflet');
+      const L = l.default;
+
+      // initialize map
+      const map = L.map('map').setView([39, -98], 4);
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
+
+      // FUNCTIONS FOR LEAFLET
+      const addPropertyMarker = (property: PropertyData) => {
+        const lat = property.latitude ?? 0;
+        const lng = property.longitude ?? 0;
+        console.debug(lat, lng);
+        const marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup(`<b>${property.name}</b><br>${property.address_1}`);
+      };
+
+      // add markers for now just first 10
+      properties.forEach((property) => {
+        addPropertyMarker(property);
+      });
     } catch (e) {
       console.log(e);
     }
-  };
+  });
 </script>
 
-<svlete:head>
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-    on:load={startMap}
-  ></script>
-</svlete:head>
-<div id="map" class="h-72" />
+<div id="map" />
+
+<style lang="postcss">
+  #map {
+    @apply h-72;
+  }
+</style>

@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { PageServerData } from './$types';
-  import { page } from '$app/stores';
   import PropertiesMap from '$lib/components/PropertiesMap.svelte';
   export let data: PageServerData;
   const tableRows = data.properties.map((property) => {
@@ -16,7 +15,7 @@
 
 <div class="p-6">
   <h1 class="text-hf-base-dark hf-heading-3">
-    {$page.params.ticker} Properties
+    {data.ticker} Properties
   </h1>
   <PropertiesMap />
   <table class="mt-4 border border-hf-grey rounded-lg">
