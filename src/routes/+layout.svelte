@@ -10,11 +10,9 @@
 </svelte:head>
 
 <div class="h-screen w-screen -z-50 bg-hf-base-light overflow-auto flex flex-col">
-  <h1
-    class="sticky top-0 p-2 w-full border-b border-hf-grey text-hf-base-dark hf-body-2-x bg-hf-base-light flex-shrink-0"
-  >
-    Housefire
-  </h1>
+  <div class="sticky top-0 p-2 w-full border-b border-hf-grey bg-hf-base-light flex-shrink-0">
+    <a class="text-hf-base-dark hf-body-2-x" href="/"> Housefire </a>
+  </div>
   <div class="overflow-auto">
     <slot />
   </div>
