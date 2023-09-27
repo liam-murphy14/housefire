@@ -3,6 +3,7 @@ import redis
 from dotenv import load_dotenv
 import os
 from urllib.parse import urlparse
+import uuid
 
 load_dotenv("../.env.development.local")
 
@@ -65,6 +66,7 @@ def parse_pld_properties():
         inplace=True,
         axis=1,
     )
+    df = df.assign(id=[str(uuid.uuid4()) for _ in range(len(df))])
     df.fillna("", inplace=True)
     property_list = df.to_dict(orient="records")
     redis_url = os.getenv("KV_URL")
