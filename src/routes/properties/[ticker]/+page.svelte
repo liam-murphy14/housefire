@@ -8,7 +8,7 @@
       City: property.city,
       State: property.state,
       Country: property.country,
-      'Square Feet': property.square_footage,
+      'Available Area': property.square_footage,
     };
   });
 </script>
@@ -36,7 +36,9 @@
         </thead>
         <tbody>
           {#each tableRows as row}
-            <tr class="border border-hf-grey">
+            <tr
+              class="border border-hf-grey hover:bg-hf-blue/30 transition-colors duration-300 ease-out cursor-pointer"
+            >
               {#each Object.values(row) as value}
                 <td class="border border-hf-grey p-2 hf-body-2 text-hf-base-dark">
                   {value}
