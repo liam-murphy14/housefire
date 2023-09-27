@@ -12,7 +12,7 @@
       const L = l.default;
 
       // initialize map
-      const map = L.map('map').setView([39, -98], 4);
+      const map = L.map('map').setView([39, -98], 3);
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -22,7 +22,6 @@
       const addPropertyMarker = (property: PropertyData) => {
         const lat = property.latitude ?? 0;
         const lng = property.longitude ?? 0;
-        console.debug(lat, lng);
         const marker = L.marker([lat, lng]).addTo(map);
         marker.bindPopup(`<b>${property.name}</b><br>${property.address_1}`);
       };
@@ -41,6 +40,6 @@
 
 <style lang="postcss">
   #map {
-    @apply h-72;
+    @apply h-96;
   }
 </style>
