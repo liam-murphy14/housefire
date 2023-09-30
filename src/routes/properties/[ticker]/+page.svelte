@@ -2,21 +2,17 @@
   import type { PageServerData } from './$types';
   import 'leaflet/dist/leaflet.css';
   import { onMount } from 'svelte';
-  import {
-    TABLE_HEADERS,
-    type PropertyData,
-    type PropertyTableRowData,
-  } from '$lib/interfaces/PropertyData.interface';
+  import type { PropertyData } from '$lib/interfaces/PropertyData.interface';
+  import SortableTable from '$lib/components/SortableTable.svelte';
 
+  type PropertyWithMarker = {
+    marker: L.Marker;
+  } & PropertyData;
   export let data: PageServerData;
 
   let L: typeof import('leaflet');
   let map: L.Map;
-  let joinedPropertyData: {
-    property: PropertyData;
-    marker: L.Marker;
-    tableRow: PropertyTableRowData;
-  }[] = [];
+  let joinedPropertyData: PropertyWithMarker[] = [];
 
   // FUNCTIONS FOR LEAFLET
   const addPropertyMarker = (property: PropertyData) => {
@@ -27,11 +23,11 @@
     return marker;
   };
 
-  const focusProperty = (property: PropertyData, marker: L.Marker) => {
-    const lat = property.latitude ?? 0;
-    const lng = property.longitude ?? 0;
+  const focusProperty = (tableRowData: PropertyWithMarker) => {
+    const lat = tableRowData.latitude ?? 0;
+    const lng = tableRowData.longitude ?? 0;
     map.flyTo([lat, lng], 13);
-    marker.openPopup();
+    tableRowData.marker.openPopup();
   };
 
   onMount(async () => {
@@ -50,15 +46,8 @@
       // add markers for now just first 10
       joinedPropertyData = data.properties.map((property) => {
         return {
-          property,
+          ...(property ?? {}),
           marker: addPropertyMarker(property),
-          tableRow: {
-            Name: (property.name || property.address_1) ?? '',
-            City: property.city ?? '',
-            State: property.state ?? '',
-            Country: property.country ?? '',
-            'Available Area': property.square_footage ?? '',
-          },
         };
       });
     } catch (e) {
@@ -80,29 +69,19 @@
       </div>
     </div>
     <div class="w-1/2 h-full overflow-auto">
-      <table class="overflow-scroll border border-hf-grey rounded-lg">
-        <thead>
-          {#each TABLE_HEADERS as key}
-            <th class="border border-hf-grey bg-hf-grey/30 p-2 hf-body-1-x text-hf-base-dark">
-              {key}
-            </th>
-          {/each}
-        </thead>
-        <tbody>
-          {#each joinedPropertyData as { property, marker, tableRow }}
-            <tr
-              class="border border-hf-grey hover:bg-hf-blue/30 transition-colors duration-300 ease-out cursor-pointer"
-              on:click={() => focusProperty(property, marker)}
-            >
-              {#each Object.values(tableRow) as value}
-                <td class="border border-hf-grey p-2 hf-body-2 text-hf-base-dark">
-                  {value}
-                </td>
-              {/each}
-            </tr>
-          {/each}
-        </tbody>
-      </table>
+      <!-- TODO: add better sort function for square feet -->
+      <SortableTable
+        idKey={'id'}
+        tableHeaders={{
+          name: 'Name',
+          address_1: 'Address',
+          city: 'City',
+          state: 'State',
+          square_footage: 'Available Area',
+        }}
+        tableData={joinedPropertyData}
+        rowOnClick={focusProperty}
+      />
     </div>
   </div>
 </div>
