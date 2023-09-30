@@ -1,6 +1,11 @@
 <script lang="ts">
   import type { PageServerData } from './$types';
   import 'leaflet/dist/leaflet.css';
+  import 'leaflet/dist/images/layers.png';
+  import 'leaflet/dist/images/layers-2x.png';
+  import 'leaflet/dist/images/marker-icon.png';
+  import 'leaflet/dist/images/marker-icon-2x.png';
+  import 'leaflet/dist/images/marker-shadow.png';
   import { onMount } from 'svelte';
   import type { PropertyData } from '$lib/interfaces/PropertyData.interface';
   import SortableTable from '$lib/components/SortableTable.svelte';
