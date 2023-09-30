@@ -35,6 +35,7 @@
       // import leaflet
       const l = await import('leaflet');
       L = l.default;
+      L.Icon.Default.imagePath = '/leaflet/';
 
       // initialize map
       map = L.map('map').setView([39, -98], 3);
