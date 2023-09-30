@@ -1,5 +1,7 @@
-<script>
+<script lang="ts">
   import '../app.postcss';
+  import Seo from '$lib/components/Seo.svelte';
+  import { page } from '$app/stores';
 </script>
 
 <svelte:head>
@@ -9,9 +11,11 @@
   />
 </svelte:head>
 
+<Seo title={$page.data.metaTags.title} metadescription={$page.data.metaTags.description} />
+
 <div class="h-screen w-screen -z-50 bg-hf-base-light overflow-auto flex flex-col">
   <div class="sticky top-0 p-2 w-full border-b border-hf-grey bg-hf-base-light flex-shrink-0">
-    <a class="text-hf-base-dark hf-body-2-x" href="/"> Housefire </a>
+    <a href="/"><img src="/hf-logo.svg" alt="Housefire Logo" /> </a>
   </div>
   <div class="overflow-auto">
     <slot />

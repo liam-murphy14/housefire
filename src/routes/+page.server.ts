@@ -9,5 +9,10 @@ export const load: PageServerLoad = async () => {
     .filter((ticker) => !!ticker) as string[];
   return {
     tickersWithProperties,
+    metaTags: {
+      title: 'Home of the Hottest REIT Data',
+      description:
+        'See fine-grained property data for your favorite REITs, updated monthly with more tickers added regularly.',
+    },
   };
 };

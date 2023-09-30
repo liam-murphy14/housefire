@@ -8,5 +8,9 @@ export const load: PageServerLoad = async ({ params }) => {
   return {
     ticker,
     properties,
+    metaTags: {
+      title: `${ticker} Property Data`,
+      description: `See fine-grained property data for ${ticker} holdings, including property type, location, square footage, and more.`,
+    },
   };
 };
