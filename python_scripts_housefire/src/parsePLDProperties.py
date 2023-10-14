@@ -5,7 +5,7 @@ import os
 from urllib.parse import urlparse
 import uuid
 
-load_dotenv("../.env.development.local")
+load_dotenv("../.env.local")
 
 REIT_CSV_LOCATION = "/Users/liammurphy/Downloads/pld_properties.csv"
 UNNECESSARY_COLUMNS = [
@@ -71,7 +71,7 @@ def parse_pld_properties():
     property_list = df.to_dict(orient="records")
     redis_url = os.getenv("KV_URL")
     if not redis_url:
-        raise Exception("Missing KV_URL in .env.development.local")
+        raise Exception("Missing KV_URL in environment")
 
     url_obj = urlparse(redis_url)
     host = url_obj.hostname
