@@ -1,2 +1,6 @@
 venv
 temp
+.env
+.env.*
+!.env.example
+
