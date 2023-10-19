@@ -5,7 +5,7 @@ import os
 from urllib.parse import urlparse
 import uuid
 
-load_dotenv("../.env.local")
+load_dotenv()
 
 REIT_CSV_LOCATION = "/Users/liammurphy/Downloads/pld_properties.csv"
 UNNECESSARY_COLUMNS = [
