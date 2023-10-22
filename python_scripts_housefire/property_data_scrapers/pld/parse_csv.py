@@ -7,7 +7,10 @@ import uuid
 
 load_dotenv()
 
-REIT_CSV_LOCATION = "/Users/liammurphy/Downloads/pld_properties.csv"
+TEMP_DIR = os.getenv("TEMP_DIR")
+if TEMP_DIR is None:
+    raise Exception("Missing TEMP_DIR in environment")
+REIT_CSV_LOCATION = os.path.join(TEMP_DIR, "pld_properties.csv")
 UNNECESSARY_COLUMNS = [
     "Available Date",
     "Market Property Type",
@@ -91,6 +94,8 @@ def parse_pld_properties():
     )
 
     r.json().set("properties:PLD", "$", property_list)
+
+    os.remove(REIT_CSV_LOCATION)
 
 
 if __name__ == "__main__":
