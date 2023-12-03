@@ -15,7 +15,14 @@
         default = pkgs.mkShell {
           packages = with pkgs; [ python311 ] ++
             (with pkgs.python311Packages; [
-              pip
+              # figure out how to simulate -e .
+              pandas
+              redis
+              hiredis
+              python-dotenv
+              black
+              requests
+              # add undetected chromedriver
             ]);
         };
       });
