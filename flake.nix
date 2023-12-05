@@ -10,7 +10,18 @@
         pkgs = import nixpkgs { inherit system; };
       });
       housefirePython = { python3, fetchFromGitHub }: python3.withPackages (ps: with ps; [
-        # figure out how to simulate -e .
+        (callPackage ./default.nix {
+          pandas = pandas;
+          redis = redis;
+          hiredis = hiredis;
+          python-dotenv = python-dotenv;
+          requests = requests;
+          undetected-chromedriver = (callPackage ./undetected-chromedriver.nix {
+            selenium = selenium;
+            requests = requests;
+            websockets = websockets;
+          });
+        })
         pandas
         redis
         hiredis
@@ -18,8 +29,6 @@
         black
         requests
         (callPackage ./undetected-chromedriver.nix {
-          buildPythonPackage = buildPythonPackage;
-          fetchFromGithub = fetchFromGitHub;
           selenium = selenium;
           requests = requests;
           websockets = websockets;

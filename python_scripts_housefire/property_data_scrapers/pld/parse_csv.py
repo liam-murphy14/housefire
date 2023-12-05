@@ -5,12 +5,6 @@ import os
 from urllib.parse import urlparse
 import uuid
 
-load_dotenv()
-
-TEMP_DIR = os.getenv("TEMP_DIR")
-if TEMP_DIR is None:
-    raise Exception("Missing TEMP_DIR in environment")
-REIT_CSV_LOCATION = os.path.join(TEMP_DIR, "pld_properties.csv")
 UNNECESSARY_COLUMNS = [
     "Available Date",
     "Market Property Type",
@@ -99,4 +93,10 @@ def parse_pld_properties():
 
 
 if __name__ == "__main__":
+    load_dotenv()
+
+    TEMP_DIR = os.getenv("TEMP_DIR")
+    if TEMP_DIR is None:
+        raise Exception("Missing TEMP_DIR in environment")
+    REIT_CSV_LOCATION = os.path.join(TEMP_DIR, "pld_properties.csv")
     parse_pld_properties()

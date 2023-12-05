@@ -3,12 +3,6 @@ import pandas as pd
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-
-TEMP_DIR_PATH = os.getenv("TEMP_DIR")
-if TEMP_DIR_PATH is None:
-    raise Exception("TEMP_DIR environment variable not set")
-REIT_CSV_PATH = os.path.join(TEMP_DIR_PATH, "reits.csv")
 
 CIK_ENDPOINT = "https://sec.gov/files/company_tickers.json"
 
@@ -30,6 +24,12 @@ def format_edge_config_ciks():
 
 
 if __name__ == "__main__":
+    load_dotenv()
+
+    TEMP_DIR_PATH = os.getenv("TEMP_DIR")
+    if TEMP_DIR_PATH is None:
+        raise Exception("TEMP_DIR environment variable not set")
+    REIT_CSV_PATH = os.path.join(TEMP_DIR_PATH, "reits.csv")
     if not os.path.exists(REIT_CSV_PATH):
         raise Exception(f"{REIT_CSV_PATH} does not exist")
     formatted_ciks = format_edge_config_ciks()

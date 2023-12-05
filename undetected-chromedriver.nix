@@ -1,6 +1,6 @@
 { lib
 , buildPythonPackage
-, fetchFromGithub
+, fetchFromGitHub
 , selenium
 , requests
 , websockets
@@ -9,7 +9,7 @@ buildPythonPackage rec {
   pname = "undetected-chromedriver";
   version = "3.5.4";
 
-  src = fetchFromGithub {
+  src = fetchFromGitHub {
     owner = "ultrafunkamsterdam";
     repo = pname;
     rev = "783b8393157b578e19e85b04d300fe06efeef653";
