@@ -1,22 +1,19 @@
 { lib
 , buildPythonPackage
 , pandas
-, redis
-, hiredis
 , python-dotenv
 , requests
 , undetected-chromedriver
 }:
+
 buildPythonPackage rec {
-  pname = "python-scripts-housefire";
+  pname = "python-serverless-housefire";
   version = "1.0.0";
 
-  src = ./python_scripts_housefire/.;
+  src = ./.;
 
   propagatedBuildInputs = [
     pandas
-    redis
-    hiredis
     python-dotenv
     requests
     undetected-chromedriver

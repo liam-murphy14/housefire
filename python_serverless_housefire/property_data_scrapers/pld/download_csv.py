@@ -8,10 +8,10 @@ import time
 PLD_URL = "https://www.prologis.com/property-search?at=building%3Bland%3Bland_lease%3Bland_sale%3Bspec_building&bounding_box%5Btop_left%5D%5B0%5D=-143.31501&bounding_box%5Btop_left%5D%5B1%5D=77.44197&bounding_box%5Bbottom_right%5D%5B0%5D=163.24749&bounding_box%5Bbottom_right%5D%5B1%5D=-60.98419&ms=uscustomary&lsr%5Bmin%5D=0&lsr%5Bmax%5D=9007199254740991&bsr%5Bmin%5D=0&bsr%5Bmax%5D=9007199254740991&so=metric_size_sort%2Cdesc&p=0&m=&an=0"
 
 
-def download_pld_properties():
+def download_pld_properties(temp_dir: str):
     options = Options()
     preferences = {
-        "download.default_directory": os.path.join(TEMP_DIR, "pld_props"),
+        "download.default_directory": os.path.join(temp_dir, "pld_props"),
         "download.prompt_for_download": False,
         "download.directory_upgrade": True,
     }
@@ -32,14 +32,14 @@ def download_pld_properties():
     driver.quit()
 
 
-def move_pld_properties():
+def move_pld_properties(temp_dir: str):
     # move the csv to the temp directory
-    downloaded_file = os.listdir(os.path.join(TEMP_DIR, "pld_props"))[0]
+    downloaded_file = os.listdir(os.path.join(temp_dir, "pld_props"))[0]
     os.rename(
-        os.path.join(TEMP_DIR, "pld_props", downloaded_file),
+        os.path.join(temp_dir, "pld_props", downloaded_file),
         REIT_CSV_LOCATION,
     )
-    os.removedirs(os.path.join(TEMP_DIR, "pld_props"))
+    os.removedirs(os.path.join(temp_dir, "pld_props"))
 
 
 if __name__ == "__main__":
@@ -54,5 +54,5 @@ if __name__ == "__main__":
 
     IS_HEADLESS = False if os.getenv("DEPLOY_ENV") == "development" else True
 
-    download_pld_properties()
-    move_pld_properties()
+    download_pld_properties(TEMP_DIR)
+    move_pld_properties(TEMP_DIR)

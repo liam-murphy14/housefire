@@ -1,7 +1,8 @@
 {
   description = "Nix flake for the python build inputs to housefire";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  # inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  inputs.nixpkgs.url = "git+file:///Users/liammurphy/Projects/nixpkgs";
 
   outputs = { self, nixpkgs }:
     let
@@ -9,47 +10,29 @@
       forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
         pkgs = import nixpkgs { inherit system; };
       });
-      housefirePythonScriptsPackage = { callPackage, python3Packages }: callPackage ./default.nix {
+      housefirePythonServerlessPackage = { callPackage, python3Packages }: callPackage ./default.nix {
         pandas = python3Packages.pandas;
-        redis = python3Packages.redis;
-        hiredis = python3Packages.hiredis;
         python-dotenv = python3Packages.python-dotenv;
         requests = python3Packages.requests;
-        undetected-chromedriver = (callPackage ./undetected-chromedriver.nix {
-          selenium = python3Packages.selenium;
-          requests = python3Packages.requests;
-          websockets = python3Packages.websockets;
-        });
+        undetected-chromedriver = python3Packages.undetected-chromedriver;
       };
-      housefirePython = { python3, fetchFromGitHub }: python3.withPackages (ps: with ps; [
+      housefireServerlessPython = { python3, fetchFromGitHub }: python3.withPackages (ps: with ps; [
         (callPackage ./default.nix {
           pandas = pandas;
-          redis = redis;
-          hiredis = hiredis;
           python-dotenv = python-dotenv;
           requests = requests;
-          undetected-chromedriver = (callPackage ./undetected-chromedriver.nix {
-            selenium = selenium;
-            requests = requests;
-            websockets = websockets;
-          });
+          undetected-chromedriver = undetected-chromedriver;
         })
         pandas
-        redis
-        hiredis
         python-dotenv
         black
         requests
-        (callPackage ./undetected-chromedriver.nix {
-          selenium = selenium;
-          requests = requests;
-          websockets = websockets;
-        })
+        undetected-chromedriver
       ]);
     in
     {
       packages = forEachSupportedSystem ({ pkgs }: {
-        default = housefirePythonScriptsPackage {
+        default = housefirePythonServerlessPackage {
           callPackage = pkgs.callPackage;
           python3Packages = pkgs.python311Packages;
         };
@@ -57,7 +40,7 @@
       devShells = forEachSupportedSystem ({ pkgs }: {
         default = pkgs.mkShell {
           packages = with pkgs; [
-            (housefirePython {
+            (housefireServerlessPython {
               python3 = python311;
               fetchFromGitHub = fetchFromGitHub;
             })

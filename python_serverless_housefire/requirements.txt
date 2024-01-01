@@ -1,7 +1,5 @@
 -e .
 pandas
-redis
-hiredis
 python-dotenv
 black
 requests

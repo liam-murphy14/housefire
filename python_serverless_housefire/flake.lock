@@ -1,0 +1,26 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1704070834,
+        "narHash": "sha256-tY04KdL8RO95uqwrbbvl6TAl18JUCv2jOEEM7PA5pYM=",
+        "ref": "refs/heads/add-python-undetected-chromedriver",
+        "rev": "f6e8566666633992662b92868bc91c1ef7ffa93f",
+        "revCount": 564518,
+        "type": "git",
+        "url": "file:///Users/liammurphy/Projects/nixpkgs"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///Users/liammurphy/Projects/nixpkgs"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

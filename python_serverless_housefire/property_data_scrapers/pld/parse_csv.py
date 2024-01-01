@@ -1,5 +1,4 @@
 import pandas as pd
-import redis
 from dotenv import load_dotenv
 import os
 from urllib.parse import urlparse
@@ -51,8 +50,8 @@ COLUMN_NAMES_MAP = {
 }
 
 
-def parse_pld_properties():
-    df = pd.read_csv(REIT_CSV_LOCATION)
+def parse_pld_properties(reit_csv_location: str):
+    df = pd.read_csv(reit_csv_location)
     df.drop(
         axis=1,
         columns=UNNECESSARY_COLUMNS,
@@ -79,17 +78,7 @@ def parse_pld_properties():
     if not host or not port:
         raise Exception("Missing host or port in KV_URL")
 
-    r = redis.Redis(
-        host=host,
-        port=port,
-        username=username,
-        password=password,
-        ssl=ssl,
-    )
-
-    r.json().set("properties:PLD", "$", property_list)
-
-    os.remove(REIT_CSV_LOCATION)
+    os.remove(reit_csv_location)
 
 
 if __name__ == "__main__":
@@ -99,4 +88,4 @@ if __name__ == "__main__":
     if TEMP_DIR is None:
         raise Exception("Missing TEMP_DIR in environment")
     REIT_CSV_LOCATION = os.path.join(TEMP_DIR, "pld_properties.csv")
-    parse_pld_properties()
+    parse_pld_properties(REIT_CSV_LOCATION)
