@@ -49,7 +49,7 @@ if __name__ == "__main__":
     if TEMP_DIR is None:
         raise Exception("Missing TEMP_DIR in environment")
     REIT_CSV_LOCATION = os.path.join(TEMP_DIR, "pld_properties.csv")
-    DRIVER_PATH = os.path.join(TEMP_DIR, "chromedriver")
+    DRIVER_PATH = "/Users/liammurphy/Downloads/chromedriver"
     CHROME_PATH = os.getenv("CHROME_PATH")
 
     IS_HEADLESS = False if os.getenv("DEPLOY_ENV") == "development" else True

@@ -4,6 +4,8 @@
 , python-dotenv
 , requests
 , undetected-chromedriver
+, chromedriver
+, chromium
 }:
 
 buildPythonPackage rec {
@@ -18,6 +20,8 @@ buildPythonPackage rec {
     requests
     undetected-chromedriver
   ];
+
+  buildInputs = [ chromedriver chromium ];
 
   meta = with lib; {
     homepage = "https://github.com/liam-murphy14/housefire";
