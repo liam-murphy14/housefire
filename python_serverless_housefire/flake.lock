@@ -2,17 +2,16 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1704070834,
-        "narHash": "sha256-tY04KdL8RO95uqwrbbvl6TAl18JUCv2jOEEM7PA5pYM=",
-        "ref": "refs/heads/add-python-undetected-chromedriver",
-        "rev": "f6e8566666633992662b92868bc91c1ef7ffa93f",
-        "revCount": 564518,
+        "dirtyRev": "2c02b18a414d1330e08196df5d0383f9b29b48cc-dirty",
+        "dirtyShortRev": "2c02b18a414d-dirty",
+        "lastModified": 1706161851,
+        "narHash": "sha256-bcVFTFJ7h5eY5IawVNCXcaSEK6p9PsuuES+I+0tt7ls=",
         "type": "git",
-        "url": "file:///Users/liammurphy/Projects/nixpkgs"
+        "url": "file:///home/liam/nixpkgs"
       },
       "original": {
         "type": "git",
-        "url": "file:///Users/liammurphy/Projects/nixpkgs"
+        "url": "file:///home/liam/nixpkgs"
       }
     },
     "root": {
