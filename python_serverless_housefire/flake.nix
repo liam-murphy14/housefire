@@ -2,8 +2,8 @@
   description = "Nix flake for the python build inputs to housefire";
 
   # inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-  # inputs.nixpkgs.url = "git+file:///Users/liammurphy/Projects/nixpkgs";
-  inputs.nixpkgs.url = "git+file:///home/liam/nixpkgs";
+  inputs.nixpkgs.url = "git+file:///Users/liammurphy/Projects/nixpkgs";
+  # inputs.nixpkgs.url = "git+file:///home/liam/nixpkgs";
 
   outputs = { self, nixpkgs }:
     let
@@ -17,7 +17,7 @@
         python-dotenv = python3Packages.python-dotenv;
         requests = python3Packages.requests;
         undetected-chromedriver = python3Packages.undetected-chromedriver;
-        chromium = if pkgs.system == "aarch64-linux" || pkgs.system == "x86_64-linux" then pkgs.chromium else null;
+        chromium = if (!pkgs.stdenv.isDarwin) then pkgs.chromium else null;
       };
       housefireServerlessPython = { python3, fetchFromGitHub, pkgs }: python3.withPackages (ps: with ps; [
         (callPackage ./default.nix {
@@ -25,7 +25,7 @@
           python-dotenv = python-dotenv;
           requests = requests;
           undetected-chromedriver = undetected-chromedriver;
-          chromium = if pkgs.system == "aarch64-linux" || pkgs.system == "x86_64-linux" then pkgs.chromium else null;
+          chromium = if (!pkgs.stdenv.isDarwin) then pkgs.chromium else null;
         })
         pandas
         python-dotenv
@@ -50,11 +50,10 @@
               fetchFromGitHub = fetchFromGitHub;
               pkgs = pkgs;
             })
-            (if pkgs.system == "aarch64-linux" || pkgs.system == "x86_64-linux" then pkgs.chromium else null)
+            (if (!pkgs.stdenv.isDarwin) then pkgs.chromium else null)
           ];
 
           shellHook = ''
-            export CHROME_PATH=${pkgs.chromium}/bin/chromium;
             export CHROMEDRIVER_PATH=${pkgs.python311Packages.undetected-chromedriver}/bin/chromedriver
           '';
         };

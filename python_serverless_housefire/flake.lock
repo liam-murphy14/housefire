@@ -2,16 +2,16 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "dirtyRev": "2c02b18a414d1330e08196df5d0383f9b29b48cc-dirty",
-        "dirtyShortRev": "2c02b18a414d-dirty",
-        "lastModified": 1706161851,
-        "narHash": "sha256-bcVFTFJ7h5eY5IawVNCXcaSEK6p9PsuuES+I+0tt7ls=",
+        "dirtyRev": "0cd4d2497596eeb3e5fee4559c51b82b4b67a0c0-dirty",
+        "dirtyShortRev": "0cd4d2497596-dirty",
+        "lastModified": 1708284598,
+        "narHash": "sha256-TuE6SU4623l96JaRTf28i5jcdbTJKTgw2P/q/JyOlUo=",
         "type": "git",
-        "url": "file:///home/liam/nixpkgs"
+        "url": "file:///Users/liammurphy/Projects/nixpkgs"
       },
       "original": {
         "type": "git",
-        "url": "file:///home/liam/nixpkgs"
+        "url": "file:///Users/liammurphy/Projects/nixpkgs"
       }
     },
     "root": {
