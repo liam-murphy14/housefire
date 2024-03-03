@@ -2,8 +2,8 @@
   description = "Nix flake for the python build inputs to housefire";
 
   # inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-  inputs.nixpkgs.url = "git+file:///Users/liammurphy/Projects/nixpkgs";
-  # inputs.nixpkgs.url = "git+file:///home/liam/nixpkgs";
+  # inputs.nixpkgs.url = "git+file:///Users/liammurphy/Projects/nixpkgs";
+  inputs.nixpkgs.url = "git+file:///home/liam/nixpkgs";
 
   outputs = { self, nixpkgs }:
     let
@@ -55,7 +55,9 @@
 
           shellHook = ''
             export CHROMEDRIVER_PATH=${pkgs.python311Packages.undetected-chromedriver}/bin/chromedriver
-          '';
+          '' + (pkgs.lib.optionalString (!pkgs.stdenv.isDarwin) ''
+            export CHROME_PATH=${pkgs.chromium}/bin/chromium
+          '');
         };
       });
       formatter = forEachSupportedSystem ({ pkgs }: pkgs.nixpkgs-fmt

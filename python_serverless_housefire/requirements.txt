@@ -1,6 +1,0 @@
--e .
-pandas
-python-dotenv
-black
-requests
-undetected-chromedriver
