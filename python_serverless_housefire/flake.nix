@@ -1,6 +1,7 @@
 {
   description = "Nix flake for the python build inputs to housefire";
 
+  # TODO: change to overlay so it's not stupid ?
   # inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   # inputs.nixpkgs.url = "git+file:///Users/liammurphy/Projects/nixpkgs";
   inputs.nixpkgs.url = "git+file:///home/liam/nixpkgs";
