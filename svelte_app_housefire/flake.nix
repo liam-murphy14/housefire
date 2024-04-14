@@ -23,6 +23,7 @@
             (python3.withPackages (python-pkgs: [
 
             ]))
+            npm-check-updates
           ];
         };
       });
