@@ -9,6 +9,9 @@ node_modules
 venv
 .vscode
 .vercel
+.direnv
+flake.lock
+flake.nix
 
 # Ignore files for PNPM, NPM and YARN
 pnpm-lock.yaml

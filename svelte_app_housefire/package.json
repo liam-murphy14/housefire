@@ -12,7 +12,8 @@
     "lint": "prettier --plugin-search-dir . --check . && eslint .",
     "prettier": "prettier --plugin-search-dir . --write .",
     "test:integration": "playwright test",
-    "test:unit": "vitest"
+    "test:unit": "vitest",
+    "postinstall": "prisma generate"
   },
   "devDependencies": {
     "@playwright/test": "^1.43.1",
@@ -42,6 +43,8 @@
   },
   "type": "module",
   "dependencies": {
-    "leaflet": "^1.9.4"
+    "@prisma/client": "^5.12.1",
+    "leaflet": "^1.9.4",
+    "prisma": "^5.12.1"
   }
 }
