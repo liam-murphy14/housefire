@@ -1,10 +1,18 @@
-import { kv } from '@vercel/kv';
+import { PrismaClient } from '@prisma/client';
 import type { PageServerLoad } from './$types';
-import type { PropertyData } from '$lib/interfaces/PropertyData.interface';
+
+const prisma = new PrismaClient();
 
 export const load: PageServerLoad = async ({ params }) => {
   const { ticker } = params;
-  const properties = (await kv.json.get(`properties:${ticker}`)) as PropertyData[];
+  const properties = await prisma.property.findMany({
+    where: {
+      reit: {
+        ticker,
+      },
+    },
+  });
+
   return {
     ticker,
     properties,

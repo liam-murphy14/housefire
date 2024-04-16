@@ -30,6 +30,8 @@ model Property {
   latitude      Float?
   longitude     Float?
   squareFootage Int?
-  reit          Reit     @relation(fields: [reitId], references: [id])
-  reitId        String
+  reit          Reit     @relation(fields: [reitTicker], references: [ticker])
+  reitTicker        String 
+
+  @@index([reitTicker])
 }

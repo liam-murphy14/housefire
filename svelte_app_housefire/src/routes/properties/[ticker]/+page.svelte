@@ -2,12 +2,12 @@
   import type { PageServerData } from './$types';
   import 'leaflet/dist/leaflet.css';
   import { onMount } from 'svelte';
-  import type { PropertyData } from '$lib/interfaces/PropertyData.interface';
+  import type { Property } from '@prisma/client';
   import SortableTable from '$lib/components/SortableTable.svelte';
 
   type PropertyWithMarker = {
     marker: L.Marker;
-  } & PropertyData;
+  } & Property;
   export let data: PageServerData;
 
   let L: typeof import('leaflet');
@@ -15,11 +15,11 @@
   let joinedPropertyData: PropertyWithMarker[] = [];
 
   // FUNCTIONS FOR LEAFLET
-  const addPropertyMarker = (property: PropertyData) => {
+  const addPropertyMarker = (property: Property) => {
     const lat = property.latitude ?? 0;
     const lng = property.longitude ?? 0;
     const marker = L.marker([lat, lng]).addTo(map);
-    marker.bindPopup(`<b>${property.name}</b><br>${property.address_1}`);
+    marker.bindPopup(`<b>${property.name}</b><br>${property.address}`);
     return marker;
   };
 
