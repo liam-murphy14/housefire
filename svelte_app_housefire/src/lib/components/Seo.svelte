@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { VERTICAL_LINE_ENTITY } from '$lib/constants/entities';
+  import { VERTICAL_LINE_ENTITY } from '$lib/constants/unicodeChars';
 
   export let metadescription: string;
   export let title: string;

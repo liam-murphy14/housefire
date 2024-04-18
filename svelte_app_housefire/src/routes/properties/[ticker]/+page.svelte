@@ -32,7 +32,7 @@
 
   onMount(async () => {
     try {
-      // import leaflet
+      // import leaflet onMount since it is client only
       const l = await import('leaflet');
       L = l.default;
       L.Icon.Default.imagePath = '/leaflet/';
