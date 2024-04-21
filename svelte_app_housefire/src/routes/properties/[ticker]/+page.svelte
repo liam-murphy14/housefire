@@ -16,6 +16,7 @@
 
   // FUNCTIONS FOR LEAFLET
   const addPropertyMarker = (property: Property) => {
+    // TODO: add better error handling for missing lat/lng
     const lat = property.latitude ?? 0;
     const lng = property.longitude ?? 0;
     const marker = L.marker([lat, lng]).addTo(map);
@@ -24,6 +25,7 @@
   };
 
   const focusProperty = (tableRowData: PropertyWithMarker) => {
+    // TODO: add better error handling for missing lat/lng
     const lat = tableRowData.latitude ?? 0;
     const lng = tableRowData.longitude ?? 0;
     map.flyTo([lat, lng], 13);
@@ -44,7 +46,6 @@
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
 
-      // add markers for now just first 10
       joinedPropertyData = data.properties.map((property) => {
         return {
           ...(property ?? {}),
@@ -70,15 +71,14 @@
       </div>
     </div>
     <div class="w-1/2 h-full overflow-auto">
-      <!-- TODO: add better sort function for square feet -->
       <SortableTable
         idKey={'id'}
         tableHeaders={{
           name: 'Name',
-          address_1: 'Address',
+          address: 'Address',
           city: 'City',
           state: 'State',
-          square_footage: 'Available Area',
+          squareFootage: 'Square Footage',
         }}
         tableData={joinedPropertyData}
         rowOnClick={focusProperty}
