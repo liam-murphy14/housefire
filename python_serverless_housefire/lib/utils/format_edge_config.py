@@ -1,3 +1,4 @@
+# TODO: instead of edge config nonsese, just add these objects to the REIT table in db
 import requests as r
 import pandas as pd
 from dotenv import load_dotenv
