@@ -2,7 +2,6 @@ import { getAllTickers } from '$lib/server/db/reitQueries';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-
   return {
     reitTickers: await getAllTickers(),
     metaTags: {
