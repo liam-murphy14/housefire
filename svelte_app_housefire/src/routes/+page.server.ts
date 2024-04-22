@@ -1,20 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import { getAllTickers } from '$lib/server/db/reitQueries';
 import type { PageServerLoad } from './$types';
 
-const prisma = new PrismaClient();
-
 export const load: PageServerLoad = async () => {
-  // TODO: refactor into dao ??
-  const reitTickers = await prisma.reit.findMany(
-    {
-      select: {
-        ticker: true,
-      }
-    }
-  );
 
   return {
-    reitTickers: reitTickers.map((reit) => reit.ticker),
+    reitTickers: await getAllTickers(),
     metaTags: {
       title: 'Home of the Hottest REIT Data',
       description:

@@ -11,7 +11,7 @@
   />
 </svelte:head>
 
-<Seo title={$page.data.metaTags.title} metadescription={$page.data.metaTags.description} />
+<Seo title={$page?.data?.metaTags?.title ?? "Housefire"} metadescription={$page?.data?.metaTags?.description ?? "See fine-grained property data for your favorite REITs, updated monthly with more tickers added regularly."} />
 
 <div class="h-screen w-screen -z-50 bg-hf-base-light overflow-auto flex flex-col">
   <div class="sticky top-0 p-2 w-full border-b border-hf-grey bg-hf-base-light flex-shrink-0">
