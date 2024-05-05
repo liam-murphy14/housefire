@@ -2,17 +2,18 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1709184309,
-        "narHash": "sha256-Uc7dCLVVvBERtkZOpW0IDM+8VZ5DBgglufzFePRkQdw=",
-        "ref": "refs/heads/garbage-merge-again",
-        "rev": "a2d3ea00cc066eec0c3212b2d1818a7ed1d8194e",
-        "revCount": 588594,
-        "type": "git",
-        "url": "file:///home/liam/nixpkgs"
+        "lastModified": 1714946845,
+        "narHash": "sha256-75xKTCDyw7MgrfmSWh2FSC7O514DDln9x35PxdQORqY=",
+        "owner": "liam-murphy14",
+        "repo": "nixpkgs",
+        "rev": "d2fc8005c49e71b73955582475286910a3fe12f4",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:///home/liam/nixpkgs"
+        "owner": "liam-murphy14",
+        "ref": "housefire-merge",
+        "repo": "nixpkgs",
+        "type": "github"
       }
     },
     "root": {

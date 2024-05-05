@@ -3,8 +3,7 @@
 
   # TODO: change to overlay so it's not stupid ?
   # inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-  # inputs.nixpkgs.url = "git+file:///Users/liammurphy/Projects/nixpkgs";
-  inputs.nixpkgs.url = "git+file:///home/liam/nixpkgs";
+  inputs.nixpkgs.url = "github:liam-murphy14/nixpkgs/housefire-merge";
 
   outputs = { self, nixpkgs }:
     let
