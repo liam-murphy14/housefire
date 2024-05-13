@@ -1,7 +1,4 @@
 import pandas as pd
-from dotenv import load_dotenv
-import os
-from urllib.parse import urlparse
 import uuid
 
 UNNECESSARY_COLUMNS = [
@@ -50,8 +47,7 @@ COLUMN_NAMES_MAP = {
 }
 
 
-def parse_pld_properties(reit_csv_location: str):
-    df = pd.read_csv(reit_csv_location)
+def transform(df: pd.DataFrame) -> pd.DataFrame:
     df.drop(
         axis=1,
         columns=UNNECESSARY_COLUMNS,
@@ -64,28 +60,4 @@ def parse_pld_properties(reit_csv_location: str):
     )
     df = df.assign(id=[str(uuid.uuid4()) for _ in range(len(df))])
     df.fillna("", inplace=True)
-    property_list = df.to_dict(orient="records")
-    redis_url = os.getenv("KV_URL")
-    if not redis_url:
-        raise Exception("Missing KV_URL in environment")
-
-    url_obj = urlparse(redis_url)
-    host = url_obj.hostname
-    port = url_obj.port
-    username = url_obj.username
-    password = url_obj.password
-    ssl = True
-    if not host or not port:
-        raise Exception("Missing host or port in KV_URL")
-
-    os.remove(reit_csv_location)
-
-
-if __name__ == "__main__":
-    load_dotenv()
-
-    TEMP_DIR = os.getenv("TEMP_DIR")
-    if TEMP_DIR is None:
-        raise Exception("Missing TEMP_DIR in environment")
-    REIT_CSV_LOCATION = os.path.join(TEMP_DIR, "pld_properties.csv")
-    parse_pld_properties(REIT_CSV_LOCATION)
+    return df

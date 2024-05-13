@@ -1,10 +1,10 @@
 { lib
 , buildPythonPackage
+, chromium
 , pandas
 , python-dotenv
 , requests
 , undetected-chromedriver
-, chromium
 }:
 
 buildPythonPackage rec {
