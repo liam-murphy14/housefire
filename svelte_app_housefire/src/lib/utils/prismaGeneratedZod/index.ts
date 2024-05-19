@@ -163,6 +163,59 @@ export const PropertySelectSchema: z.ZodType<Prisma.PropertySelect> = z
   })
   .strict();
 
+// CREATE MANY REIT AND RETURN OUTPUT TYPE
+//------------------------------------------------------
+
+export const CreateManyReitAndReturnOutputTypeSelectSchema: z.ZodType<Prisma.CreateManyReitAndReturnOutputTypeSelect> =
+  z
+    .object({
+      id: z.boolean().optional(),
+      createdAt: z.boolean().optional(),
+      updatedAt: z.boolean().optional(),
+      ticker: z.boolean().optional(),
+    })
+    .strict();
+
+// CREATE MANY PROPERTY AND RETURN OUTPUT TYPE
+//------------------------------------------------------
+
+export const CreateManyPropertyAndReturnOutputTypeIncludeSchema: z.ZodType<Prisma.CreateManyPropertyAndReturnOutputTypeInclude> =
+  z
+    .object({
+      reit: z.union([z.boolean(), z.lazy(() => ReitArgsSchema)]).optional(),
+    })
+    .strict();
+
+export const CreateManyPropertyAndReturnOutputTypeArgsSchema: z.ZodType<Prisma.CreateManyPropertyAndReturnOutputTypeDefaultArgs> =
+  z
+    .object({
+      select: z.lazy(() => CreateManyPropertyAndReturnOutputTypeSelectSchema).optional(),
+      include: z.lazy(() => CreateManyPropertyAndReturnOutputTypeIncludeSchema).optional(),
+    })
+    .strict();
+
+export const CreateManyPropertyAndReturnOutputTypeSelectSchema: z.ZodType<Prisma.CreateManyPropertyAndReturnOutputTypeSelect> =
+  z
+    .object({
+      id: z.boolean().optional(),
+      createdAt: z.boolean().optional(),
+      updatedAt: z.boolean().optional(),
+      name: z.boolean().optional(),
+      address: z.boolean().optional(),
+      address2: z.boolean().optional(),
+      neighborhood: z.boolean().optional(),
+      city: z.boolean().optional(),
+      state: z.boolean().optional(),
+      zip: z.boolean().optional(),
+      country: z.boolean().optional(),
+      latitude: z.boolean().optional(),
+      longitude: z.boolean().optional(),
+      squareFootage: z.boolean().optional(),
+      reitTicker: z.boolean().optional(),
+      reit: z.union([z.boolean(), z.lazy(() => ReitArgsSchema)]).optional(),
+    })
+    .strict();
+
 /////////////////////////////////////////
 // INPUT TYPES
 /////////////////////////////////////////
@@ -2447,6 +2500,13 @@ export const ReitCreateManyArgsSchema: z.ZodType<Prisma.ReitCreateManyArgs> = z
   })
   .strict();
 
+export const ReitAndReturnCreateManyArgsSchema: z.ZodType<Prisma.ReitAndReturnCreateManyArgs> = z
+  .object({
+    data: z.union([ReitCreateManyInputSchema, ReitCreateManyInputSchema.array()]),
+    skipDuplicates: z.boolean().optional(),
+  })
+  .strict();
+
 export const ReitDeleteArgsSchema: z.ZodType<Prisma.ReitDeleteArgs> = z
   .object({
     select: ReitSelectSchema.optional(),
@@ -2501,6 +2561,14 @@ export const PropertyCreateManyArgsSchema: z.ZodType<Prisma.PropertyCreateManyAr
     skipDuplicates: z.boolean().optional(),
   })
   .strict();
+
+export const PropertyAndReturnCreateManyArgsSchema: z.ZodType<Prisma.PropertyAndReturnCreateManyArgs> =
+  z
+    .object({
+      data: z.union([PropertyCreateManyInputSchema, PropertyCreateManyInputSchema.array()]),
+      skipDuplicates: z.boolean().optional(),
+    })
+    .strict();
 
 export const PropertyDeleteArgsSchema: z.ZodType<Prisma.PropertyDeleteArgs> = z
   .object({

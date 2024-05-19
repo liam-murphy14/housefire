@@ -49,15 +49,14 @@ COLUMN_NAMES_MAP = {
 
 def transform(df: pd.DataFrame) -> pd.DataFrame:
     df.drop(
-        axis=1,
         columns=UNNECESSARY_COLUMNS,
         inplace=True,
+        axis=1,
     )
     df.rename(
         COLUMN_NAMES_MAP,
         inplace=True,
         axis=1,
     )
-    df = df.assign(id=[str(uuid.uuid4()) for _ in range(len(df))])
-    df.fillna("", inplace=True)
+    df.fillna(None, inplace=True)
     return df

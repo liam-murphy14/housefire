@@ -11,10 +11,20 @@ export const getPropertiesByTicker: (ticker: string) => Promise<Property[]> = as
   });
 };
 
+export const deletePropertiesByTicker = async (ticker: string) => {
+  return await prisma.property.deleteMany({
+    where: {
+      reit: {
+        ticker,
+      },
+    },
+  });
+};
+
 export const createManyProperties = async (
   propertiesToCreate: Prisma.PropertyCreateManyInput | Prisma.PropertyCreateManyInput[],
 ) => {
-  return await prisma.property.createMany({
+  return await prisma.property.createManyAndReturn({
     data: propertiesToCreate,
   });
 };
