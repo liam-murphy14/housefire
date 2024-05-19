@@ -32,7 +32,7 @@ def get_chromedriver_instance(random_temp_dir_path: str) -> uc.Chrome:
     # enable downloading files from selenium
     options = housefire.undetected_chromedriver.options.Options()
     preferences = {
-        "download.default_directory": os.path.join(random_temp_dir_path, "pld_props"),
+        "download.default_directory": random_temp_dir_path,
         "download.prompt_for_download": False,
         "download.directory_upgrade": True,
     }
