@@ -56,30 +56,34 @@ def main():
 
     random_temp_dir_path = housefire.utils.scraping_utils.create_temp_dir(TEMP_DIR_PATH)
 
-    driver = get_chromedriver_instance(random_temp_dir_path)
+    try:
 
-    if len(sys.argv) != 2:
-        raise Exception("Usage: python main.py <ticker>")
+        driver = get_chromedriver_instance(random_temp_dir_path)
 
-    ticker = sys.argv[1]
+        if len(sys.argv) != 2:
+            raise Exception("Usage: python main.py <ticker>")
 
-    if ticker not in SCRAPERS or ticker not in TRANSFORMERS:
-        raise Exception(f"Unsupported ticker: {ticker}")
+        ticker = sys.argv[1]
 
-    scrape = SCRAPERS[ticker]
-    transform = TRANSFORMERS[ticker]
+        if ticker not in SCRAPERS or ticker not in TRANSFORMERS:
+            raise Exception(f"Unsupported ticker: {ticker}")
 
-    properties_dataframe = scrape(driver, random_temp_dir_path)
-    transformed_dataframe = transform(properties_dataframe)
+        scrape = SCRAPERS[ticker]
+        transform = TRANSFORMERS[ticker]
 
-    driver.quit()
+        properties_dataframe = scrape(driver, random_temp_dir_path)
+        transformed_dataframe = transform(properties_dataframe)
 
-    housefire_api = HousefireAPI(HOUSEFIRE_API_KEY)
+        housefire_api = HousefireAPI(HOUSEFIRE_API_KEY)
 
-    housefire_api.delete_properties_by_ticker(ticker.upper())
-    housefire_api.post_properties(df_to_request(transformed_dataframe, ticker.upper()))
+        housefire_api.delete_properties_by_ticker(ticker.upper())
+        housefire_api.post_properties(
+            df_to_request(transformed_dataframe, ticker.upper())
+        )
 
-    housefire.utils.scraping_utils.delete_temp_dir(random_temp_dir_path)
+    finally:
+        driver.quit()
+        housefire.utils.scraping_utils.delete_temp_dir(random_temp_dir_path)
 
 
 if __name__ == "__main__":
