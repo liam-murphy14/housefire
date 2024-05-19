@@ -58,5 +58,5 @@ def transform(df: pd.DataFrame) -> pd.DataFrame:
         inplace=True,
         axis=1,
     )
-    df.fillna(None, inplace=True)
+    df.fillna("", inplace=True)
     return df
