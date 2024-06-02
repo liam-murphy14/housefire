@@ -1,5 +1,4 @@
 import sys
-import os
 import dotenv
 import housefire.undetected_chromedriver.options
 import housefire.utils.scraping_utils
@@ -12,14 +11,17 @@ from housefire.utils.env_utils import (
     get_env_nonnull_file,
     get_env_nonnull,
 )
-from housefire.utils.housefire_api_utils import HousefireAPI
+from housefire.utils.housefire_api import HousefireAPI
+from housefire.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 SCRAPERS = {
-    "pld": housefire.property_data_scrapers.scrapers.pld.scrape,
+    "pld": housefire.property_data_scrapers.scrapers.pld.Scraper,
 }
 
 TRANSFORMERS = {
-    "pld": housefire.property_data_scrapers.transformers.pld.transform,
+    "pld": housefire.property_data_scrapers.transformers.pld.Transformer,
 }
 
 
@@ -57,22 +59,29 @@ def main():
     random_temp_dir_path = housefire.utils.scraping_utils.create_temp_dir(TEMP_DIR_PATH)
 
     try:
-
         driver = get_chromedriver_instance(random_temp_dir_path)
+    finally:
+        housefire.utils.scraping_utils.delete_temp_dir(random_temp_dir_path)
 
+    try:
         if len(sys.argv) != 2:
             raise Exception("Usage: python main.py <ticker>")
 
         ticker = sys.argv[1]
+        logger.info(f"Scraping data for ticker: {ticker}")
 
         if ticker not in SCRAPERS or ticker not in TRANSFORMERS:
             raise Exception(f"Unsupported ticker: {ticker}")
 
-        scrape = SCRAPERS[ticker]
-        transform = TRANSFORMERS[ticker]
+        scraper = SCRAPERS[ticker](ticker, driver, random_temp_dir_path)
+        logger.debug(f"Using scraper: {scraper}")
+        transformer = TRANSFORMERS[ticker](ticker)
+        logger.debug(f"Using transformer: {transformer}")
 
-        properties_dataframe = scrape(driver, random_temp_dir_path)
-        transformed_dataframe = transform(properties_dataframe)
+        properties_dataframe = scraper.scrape()
+        logger.debug(f"Scraped properties data: {properties_dataframe}")
+        transformed_dataframe = transformer.transform(properties_dataframe)
+        logger.debug(f"Transformed properties data: {transformed_dataframe}")
 
         housefire_api = HousefireAPI(HOUSEFIRE_API_KEY)
 
