@@ -60,18 +60,20 @@ def main():
 
     try:
         driver = get_chromedriver_instance(random_temp_dir_path)
-    finally:
+    except Exception as e:
+        logger.critical(f"Failed to create chromedriver instance: {e}")
         housefire.utils.scraping_utils.delete_temp_dir(random_temp_dir_path)
+        raise e
 
     try:
         if len(sys.argv) != 2:
             raise Exception("Usage: python main.py <ticker>")
 
-        ticker = sys.argv[1]
+        ticker = sys.argv[1].lower()
         logger.info(f"Scraping data for ticker: {ticker}")
 
         if ticker not in SCRAPERS or ticker not in TRANSFORMERS:
-            raise Exception(f"Unsupported ticker: {ticker}")
+            raise ValueError(f"Unsupported ticker: {ticker}")
 
         scraper = SCRAPERS[ticker](ticker, driver, random_temp_dir_path)
         logger.debug(f"Using scraper: {scraper}")

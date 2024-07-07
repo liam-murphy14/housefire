@@ -38,7 +38,7 @@
       packages = forEachSupportedSystem ({ pkgs }: {
         default = housefirePythonServerlessPackage {
           callPackage = pkgs.callPackage;
-          python3Packages = pkgs.python311Packages;
+          python3Packages = pkgs.python312Packages;
           pkgs = pkgs;
         };
       });
@@ -46,7 +46,7 @@
         default = pkgs.mkShell {
           packages = with pkgs; [
             (housefireServerlessPython {
-              python3 = python311;
+              python3 = python312;
               fetchFromGitHub = fetchFromGitHub;
               pkgs = pkgs;
             })
@@ -54,7 +54,7 @@
           ];
 
           shellHook = ''
-            export CHROMEDRIVER_PATH=${pkgs.python311Packages.undetected-chromedriver}/bin/chromedriver
+            export CHROMEDRIVER_PATH=${pkgs.python312Packages.undetected-chromedriver}/bin/chromedriver
           '' + (pkgs.lib.optionalString (!pkgs.stdenv.isDarwin) ''
             export CHROME_PATH=${pkgs.chromium}/bin/chromium
           '');

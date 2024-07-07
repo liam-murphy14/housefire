@@ -2,11 +2,11 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1717350332,
-        "narHash": "sha256-uNo2PneYnOjgYi22atXWaSgbIiO9qFEfI5Zhv3EnqRc=",
+        "lastModified": 1720380537,
+        "narHash": "sha256-YxIiONwbKjAW8802oHIXQlDnBEEXPEdEW2d9GgwP0cg=",
         "owner": "liam-murphy14",
         "repo": "nixpkgs",
-        "rev": "771f4a2c4c3e1b20b3620d613163a77c9d082226",
+        "rev": "f2a81b80aa03aecb1aa0d69e363d5a0736381bc8",
         "type": "github"
       },
       "original": {
