@@ -1,7 +1,6 @@
-import undetected_chromedriver as uc
+import nodriver as uc
 import pandas as pd
 import os
-from selenium.webdriver.common.by import By
 import time
 from housefire.property_data_scrapers.scrapers.common import Scraper
 
@@ -13,13 +12,24 @@ class PldScraper(Scraper):
     Scraper for Prologis property data
     """
 
-    def __init__(self, ticker: str, driver: uc.Chrome, temp_dir_path: str):
+    def __init__(self, ticker: str, driver: uc.Browser, temp_dir_path: str):
         super().__init__("PLD", driver, temp_dir_path, PLD_URL)
 
-    def scrape(self) -> pd.DataFrame:
+    async def custom_scrape(self, tab: uc.Tab) -> pd.DataFrame:
         # find and click the hidden button to download the csv
-        self.driver.find_element(By.ID, "download_results").click()
-        self.driver.find_element(By.ID, "download_results_csv").click()
+        download_button = await tab.query_selector("#download_results")
+        if download_button is None:
+            raise Exception("could not find download button")
+        if not isinstance(download_button, uc.Element):
+            raise Exception("could not find download button")
+        await download_button.click()
+
+        csv_download_button = await tab.query_selector("#download_results_csv")
+        if csv_download_button is None:
+            raise Exception("could not find download button")
+        if not isinstance(csv_download_button, uc.Element):
+            raise Exception("could not find download button")
+        await csv_download_button.click()
         time.sleep(10)
 
         # get the downloaded file, hacky but works

@@ -1,28 +1,31 @@
-{ lib
-, buildPythonPackage
-, chromium
+{ buildPythonPackage
+, pythonOlder
 , pandas
 , python-dotenv
 , requests
-, undetected-chromedriver
+, nodriver
+, setuptools
 }:
 
-buildPythonPackage rec {
-  pname = "python-serverless-housefire";
+buildPythonPackage {
+  pname = "housefire";
   version = "1.0.0";
+  pyproject = true;
+
+  disabled = pythonOlder "3.9";
 
   src = ./.;
 
-  propagatedBuildInputs = [
+  dependencies = [
     pandas
     python-dotenv
     requests
-    undetected-chromedriver
+    nodriver
   ];
 
-  buildInputs = [ chromium ];
+  build-system = [ setuptools ];
 
-  meta = with lib; {
+  meta = {
     homepage = "https://github.com/liam-murphy14/housefire";
     description = "A personal project for people to see REITs";
   };
