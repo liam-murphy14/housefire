@@ -1,9 +1,15 @@
 import sys
 import dotenv
-import housefire.utils.scraping_utils
-import housefire.property_data_scrapers.scrapers.pld
-from housefire.property_data_scrapers.transformers.common import df_to_request
-import housefire.property_data_scrapers.transformers.pld
+from housefire.property_data_scrapers.scraper import (
+    SCRAPERS,
+    START_URLS,
+    scrape_wrapper,
+)
+from housefire.property_data_scrapers.transformer import (
+    TRANSFORMERS,
+    df_to_request,
+    transform_wrapper,
+)
 import nodriver as uc
 from housefire.utils.env_utils import (
     get_env_nonnull_dir,
@@ -15,16 +21,8 @@ from housefire.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-SCRAPERS = {
-    "pld": housefire.property_data_scrapers.scrapers.pld.Scraper,
-}
 
-TRANSFORMERS = {
-    "pld": housefire.property_data_scrapers.transformers.pld.Transformer,
-}
-
-
-async def get_chromedriver_instance(random_temp_dir_path: str) -> uc.Browser:
+async def get_chromedriver_instance() -> uc.Browser:
     """
     Get a new instance of the undetected_chromedriver Chrome driver
     """
@@ -33,7 +31,6 @@ async def get_chromedriver_instance(random_temp_dir_path: str) -> uc.Browser:
     return await uc.start(
         headless=True,
         browser_executable_path=CHROME_PATH,
-        user_data_dir=random_temp_dir_path,
     )
 
 
@@ -45,13 +42,10 @@ async def main():
 
     HOUSEFIRE_API_KEY = get_env_nonnull("HOUSEFIRE_API_KEY")
 
-    random_temp_dir_path = housefire.utils.scraping_utils.create_temp_dir(TEMP_DIR_PATH)
-
     try:
-        driver = await get_chromedriver_instance(random_temp_dir_path)
+        driver = await get_chromedriver_instance()
     except Exception as e:
         logger.critical(f"Failed to create chromedriver instance: {e}")
-        housefire.utils.scraping_utils.delete_temp_dir(random_temp_dir_path)
         raise e
 
     try:
@@ -61,17 +55,16 @@ async def main():
         ticker = sys.argv[1].lower()
         logger.info(f"Scraping data for ticker: {ticker}")
 
-        if ticker not in SCRAPERS or ticker not in TRANSFORMERS:
+        if (
+            ticker not in SCRAPERS
+            or ticker not in START_URLS
+            or ticker not in TRANSFORMERS
+        ):
             raise ValueError(f"Unsupported ticker: {ticker}")
 
-        scraper = SCRAPERS[ticker](ticker, driver, random_temp_dir_path)
-        logger.debug(f"Using scraper: {scraper}")
-        transformer = TRANSFORMERS[ticker](ticker)
-        logger.debug(f"Using transformer: {transformer}")
-
-        properties_dataframe = await scraper.scrape()
+        properties_dataframe = await scrape_wrapper(driver, ticker, TEMP_DIR_PATH)
         logger.debug(f"Scraped properties data: {properties_dataframe}")
-        transformed_dataframe = transformer.transform(properties_dataframe)
+        transformed_dataframe = transform_wrapper(properties_dataframe, ticker)
         logger.debug(f"Transformed properties data: {transformed_dataframe}")
 
         housefire_api = HousefireAPI(HOUSEFIRE_API_KEY)
@@ -83,7 +76,6 @@ async def main():
 
     finally:
         driver.stop()
-        housefire.utils.scraping_utils.delete_temp_dir(random_temp_dir_path)
 
 
 if __name__ == "__main__":

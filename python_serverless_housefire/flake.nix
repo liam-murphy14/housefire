@@ -36,6 +36,5 @@
       });
       formatter = forEachSupportedSystem ({ pkgs }: pkgs.nixpkgs-fmt
       );
-
     };
 }

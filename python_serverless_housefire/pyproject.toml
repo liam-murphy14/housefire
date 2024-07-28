@@ -28,9 +28,7 @@ include-package-data = true
 packages = [
     'housefire',
     'housefire.property_data_scrapers',
-    'housefire.utils',
-    'housefire.property_data_scrapers.transformers',
-    'housefire.property_data_scrapers.scrapers'
+    'housefire.utils'
 ]
 
 [build-system]

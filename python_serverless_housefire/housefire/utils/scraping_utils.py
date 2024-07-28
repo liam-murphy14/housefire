@@ -5,6 +5,7 @@ from housefire.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
+# TODO: start using this once nodriver is updated with experimental options
 def create_temp_dir(base_path: str) -> str:
     """
     Create a new directory with a random name in the temp directory
@@ -21,6 +22,7 @@ def create_temp_dir(base_path: str) -> str:
     return new_dir_path
 
 
+# TODO: start using this once nodriver is updated with experimental options
 def delete_temp_dir(temp_dir_path: str) -> None:
     """
     Delete a directory and all of its contents
