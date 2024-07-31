@@ -34,7 +34,7 @@ model Property {
   country       String?
   latitude      Float?
   longitude     Float?
-  squareFootage Int?
+  squareFootage Float?
   reit          Reit     @relation(fields: [reitTicker], references: [ticker])
   reitTicker    String
 

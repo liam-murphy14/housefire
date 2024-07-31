@@ -27,8 +27,6 @@ Issues = "https://github.com/liam-murphy14/housefire/issues"
 include-package-data = true
 packages = [
     'housefire',
-    'housefire.property_data_scrapers',
-    'housefire.utils'
 ]
 
 [build-system]

@@ -1,23 +1,23 @@
 import sys
 import dotenv
-from housefire.property_data_scrapers.scraper import (
+from housefire.scraper import (
     SCRAPERS,
     START_URLS,
     scrape_wrapper,
 )
-from housefire.property_data_scrapers.transformer import (
+from housefire.transformer import (
     TRANSFORMERS,
     df_to_request,
     transform_wrapper,
 )
 import nodriver as uc
-from housefire.utils.env_utils import (
+from housefire.utils import (
     get_env_nonnull_dir,
     get_env_nonnull_file,
     get_env_nonnull,
 )
-from housefire.utils.housefire_api import HousefireAPI
-from housefire.utils.logger import get_logger
+from housefire.housefire_api import HousefireAPI
+from housefire.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -71,7 +71,7 @@ async def main():
 
         housefire_api.delete_properties_by_ticker(ticker.upper())
         housefire_api.post_properties(
-            df_to_request(transformed_dataframe, ticker.upper())
+            df_to_request(transformed_dataframe)
         )
 
     finally:

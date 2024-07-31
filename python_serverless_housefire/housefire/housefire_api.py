@@ -1,5 +1,5 @@
 import requests as r
-from housefire.utils.logger import get_logger
+from housefire.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -12,8 +12,8 @@ class HousefireAPI:
         api_key (str): Housefire API key
     """
 
-    def __init__(self, api_key: str):
-        self.base_url = "https://housefire.liammurphydev.com/api/"
+    def __init__(self, api_key: str, base_url: str = "https://housefire.liammurphydev.com/api/"):
+        self.base_url = base_url
         self.api_key = api_key
         self.headers = {
             "x-api-key": self.api_key,
@@ -42,6 +42,7 @@ class HousefireAPI:
             self.__construct_url(endpoint), headers=self.headers, json=data
         )
         logger.debug(f"POST request to {endpoint} returned: {response}")
+        logger.debug(f"with data: {response.json()}")
         return response
 
     def __delete(self, endpoint) -> r.Response:

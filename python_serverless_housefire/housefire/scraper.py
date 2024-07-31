@@ -1,4 +1,4 @@
-from housefire.utils.logger import get_logger
+from housefire.logger import get_logger
 import pandas as pd
 import time
 import os
@@ -67,3 +67,4 @@ async def scrape_wrapper(
     scraped_data = await custom_scraper(tab, temp_dir_path)
     logger.debug(f"Scraped data for REIT: {ticker}, df: {scraped_data}")
     return scraped_data
+
