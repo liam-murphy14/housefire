@@ -12,7 +12,9 @@ class HousefireAPI:
         api_key (str): Housefire API key
     """
 
-    def __init__(self, api_key: str, base_url: str = "https://housefire.liammurphydev.com/api/"):
+    def __init__(
+        self, api_key: str, base_url: str = "https://housefire.liammurphydev.com/api/"
+    ):
         self.base_url = base_url
         self.api_key = api_key
         self.headers = {

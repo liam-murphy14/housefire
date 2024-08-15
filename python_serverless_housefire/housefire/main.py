@@ -70,9 +70,7 @@ async def main():
         housefire_api = HousefireAPI(HOUSEFIRE_API_KEY)
 
         housefire_api.delete_properties_by_ticker(ticker.upper())
-        housefire_api.post_properties(
-            df_to_request(transformed_dataframe)
-        )
+        housefire_api.post_properties(df_to_request(transformed_dataframe))
 
     finally:
         driver.stop()

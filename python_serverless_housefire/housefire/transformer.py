@@ -66,7 +66,7 @@ def _pld_transform(df: pd.DataFrame) -> pd.DataFrame:
         axis=1,
     )
     df = df.astype({"zip": "str"})
-    df['squareFootage'] = df['squareFootage'].apply(parse_and_convert_area)
+    df["squareFootage"] = df["squareFootage"].apply(parse_and_convert_area)
     return df
 
 
@@ -85,11 +85,13 @@ def transform_wrapper(data: pd.DataFrame, ticker: str) -> pd.DataFrame:
     transformed_data.fillna(np.nan, inplace=True)
     transformed_data.replace([np.nan], [None], inplace=True)
     transformed_data_with_ticker = transformed_data.assign(reitTicker=ticker.upper())
-    logger.debug(f"Transformed data for REIT: {ticker}, df: {transformed_data_with_ticker}")
+    logger.debug(
+        f"Transformed data for REIT: {ticker}, df: {transformed_data_with_ticker}"
+    )
     return transformed_data_with_ticker
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     dotenv.load_dotenv()
 
     HOUSEFIRE_API_KEY = get_env_nonnull("HOUSEFIRE_API_KEY")

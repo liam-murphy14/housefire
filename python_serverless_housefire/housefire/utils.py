@@ -99,9 +99,7 @@ def df_to_request(df: pd.DataFrame):
     """
     Convert a pandas DataFrame to a list of dictionaries
     """
-    logger.debug(
-        f"Converting DataFrame to request format for df: {df}"
-    )
+    logger.debug(f"Converting DataFrame to request format for df: {df}")
     request_dict = df.to_dict(orient="records")
     logger.debug(f"Converted DataFrame to request format: {request_dict}")
     return request_dict
