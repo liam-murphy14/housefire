@@ -54,18 +54,25 @@ async def _eqix_scrape(tab: uc.Tab, temp_dir_path: str) -> pd.DataFrame:
         jiggle_time = r.randint(10, 70)
         time.sleep(jiggle_time)
         city_tab = await tab.browser.get(city_url, new_tab=True)
-        property_urls.extend(await _eqix_scrape_single_city_property_urls(city_tab))
-        await city_tab.close()
+        try:
+            property_urls.extend(await _eqix_scrape_single_city_property_urls(city_tab))
+        except Exception as e:
+            logger.warn(f"error scraping city: {city_url}, {e}")
+        finally:
+            await city_tab.close()
     logger.debug(f"found property urls: {property_urls}")
 
     for property_url in property_urls:
         jiggle_time = r.randint(10, 70)
         time.sleep(jiggle_time)
         property_tab = await tab.browser.get(property_url, new_tab=True)
-        df = await _eqix_scrape_single_property(property_tab)
-        await property_tab.close()
-        # TODO: add caching here so that a bad scrape does not lose all data
-        df_list.append(df)
+        try:
+            df = await _eqix_scrape_single_property(property_tab)
+            df_list.append(df)
+        except Exception as e:
+            logger.warn(f"error scraping property: {property_url}, {e}")
+        finally:
+            await property_tab.close()
 
     return pd.concat(df_list)
 
@@ -160,14 +167,69 @@ async def _eqix_scrape_single_property(tab: uc.Tab) -> pd.DataFrame:
     )
 
 
+async def _welltower_scrape(tab: uc.Tab, temp_dir_path: str) -> pd.DataFrame:
+    df_list = list()
+    property_urls = await _welltower_scrape_property_urls(tab)
+    logger.debug(f"found property urls: {property_urls}")
+
+    for property_url in property_urls:
+        jiggle_time = r.randint(10, 70)
+        time.sleep(jiggle_time)
+        property_tab = await tab.browser.get(property_url, new_tab=True)
+        try:
+            df = await _welltower_scrape_single_property(property_tab)
+            df_list.append(df)
+        except Exception as e:
+            logger.warn(f"error scraping property: {property_url}, {e}")
+        finally:
+            await property_tab.close()
+
+    return pd.concat(df_list)
+
+
+async def _welltower_scrape_property_urls(tab: uc.Tab) -> list[str]:
+    time.sleep(30)
+    link_divs = await tab.query_selector_all("a[href]")
+    links = [link.attrs["href"] for link in link_divs]
+    links_without_https = list(filter(lambda link: link[:4] != "http", set(links)))
+    return list(
+        map(
+            lambda endpoint: "https://medicaloffice.welltower.com" + endpoint,
+            links_without_https,
+        )
+    )
+
+
+async def _welltower_scrape_single_property(tab: uc.Tab) -> pd.DataFrame:
+    name_div = await tab.select(".chakra-heading")
+    address_div = (await tab.query_selector_all(".chakra-text"))[1]
+    name = name_div.text.strip()
+    address_line_1 = address_div.text.strip()
+    address_line_2 = address_div.text_all[len(address_line_1) :]
+    city, state = tuple(map(lambda token: token.strip(), address_line_2.split(",")))
+    country = "US"
+    return pd.DataFrame(
+        {
+            "name": [name],
+            "address": [address_line_1],
+            "city": [city],
+            "state": [state],
+            "zip": [None],
+            "country": [country],
+        }
+    )
+
+
 SCRAPERS = {
     "pld": _pld_scrape,
     "eqix": _eqix_scrape,
+    "well": _welltower_scrape,
 }
 
 START_URLS = {
     "pld": "https://www.prologis.com/property-search?at=building%3Bland%3Bland_lease%3Bland_sale%3Bspec_building&bounding_box%5Btop_left%5D%5B0%5D=-143.31501&bounding_box%5Btop_left%5D%5B1%5D=77.44197&bounding_box%5Bbottom_right%5D%5B0%5D=163.24749&bounding_box%5Bbottom_right%5D%5B1%5D=-60.98419&ms=uscustomary&lsr%5Bmin%5D=0&lsr%5Bmax%5D=9007199254740991&bsr%5Bmin%5D=0&bsr%5Bmax%5D=9007199254740991&so=metric_size_sort%2Cdesc&p=0&m=&an=0",
     "eqix": "https://www.equinix.com/data-centers",
+    "well": "https://medicaloffice.welltower.com/search?address=USA&min=null&max=null&moveInTiming=",
 }
 
 
@@ -190,43 +252,56 @@ async def scrape_wrapper(
 
 
 if __name__ == "__main__":
-    # this is my stupid test suite, will remove and write as real unit tests sometime later
+    # this is my stupid test suite, TODO: remove and write as real unit tests sometime later
     async def main():
         browser = await uc.start()
 
-        tab = await browser.get(
-            "https://www.equinix.com/data-centers/asia-pacific-colocation/australia-colocation/brisbane-data-centers/br1"
-        )
-        df = await _eqix_scrape_single_property(tab)
-        print("SCRAPED ONE ADDRESS LINE DF")
-        print(df)
-        print("\n\n\n")
+        # EQIX
+        # tab = await browser.get(
+        #     "https://www.equinix.com/data-centers/asia-pacific-colocation/australia-colocation/brisbane-data-centers/br1"
+        # )
+        # df = await _eqix_scrape_single_property(tab)
+        # print("SCRAPED ONE ADDRESS LINE DF")
+        # print(df)
+        # print("\n\n\n")
 
-        tab = await browser.get(
-            "https://www.equinix.com/data-centers/americas-colocation/united-states-colocation/chicago-data-centers/ch2"
-        )
-        df = await _eqix_scrape_single_property(tab)
-        print("SCRAPED TWO ADDRESS LINE DF")
-        print(df)
-        print("\n\n\n")
+        # tab = await browser.get(
+        #     "https://www.equinix.com/data-centers/americas-colocation/united-states-colocation/chicago-data-centers/ch2"
+        # )
+        # df = await _eqix_scrape_single_property(tab)
+        # print("SCRAPED TWO ADDRESS LINE DF")
+        # print(df)
+        # print("\n\n\n")
 
-        tab = await browser.get("https://www.equinix.com/data-centers")
-        print("SCRAPED CITY URLS")
-        print(await _eqix_scrape_city_urls(tab))
-        print("\n\n\n")
+        # tab = await browser.get("https://www.equinix.com/data-centers")
+        # print("SCRAPED CITY URLS")
+        # print(await _eqix_scrape_city_urls(tab))
+        # print("\n\n\n")
 
-        tab = await browser.get(
-            "https://www.equinix.com/data-centers/americas-colocation/canada-colocation/calgary-data-centers"
-        )
-        print("SCRAPED MULTIPLE PROPERTY URLS")
-        print(await _eqix_scrape_single_city_property_urls(tab))
-        print("\n\n\n")
+        # tab = await browser.get(
+        #     "https://www.equinix.com/data-centers/americas-colocation/canada-colocation/calgary-data-centers"
+        # )
+        # print("SCRAPED MULTIPLE PROPERTY URLS")
+        # print(await _eqix_scrape_single_city_property_urls(tab))
+        # print("\n\n\n")
 
-        tab = await browser.get(
-            "https://www.equinix.com/data-centers/asia-pacific-colocation/australia-colocation/brisbane-data-centers"
-        )
-        print("SCRAPED SINGLE PROPERTY URL")
-        print(await _eqix_scrape_single_city_property_urls(tab))
-        print("\n\n\n")
+        # tab = await browser.get(
+        #     "https://www.equinix.com/data-centers/asia-pacific-colocation/australia-colocation/brisbane-data-centers"
+        # )
+        # print("SCRAPED SINGLE PROPERTY URL")
+        # print(await _eqix_scrape_single_city_property_urls(tab))
+        # print("\n\n\n")
+
+        # WELL welltower scrape property links
+        # tab = await browser.get("https://medicaloffice.welltower.com/search?address=USA&min=null&max=null&moveInTiming=")
+        # print("SCRAPED PROPERTY URLS")
+        # print(await _welltower_scrape_property_urls(tab))
+        # print("\n\n\n")
+
+        # WELL welltower scrape single property
+        # tab = await browser.get("https://medicaloffice.welltower.com/450-south-kitsap-boulevard")
+        # print("SCRAPED SINGLE PROPERTY")
+        # print(await _welltower_scrape_single_property(tab))
+        # print("\n\n\n")
 
     uc.loop().run_until_complete(main())
