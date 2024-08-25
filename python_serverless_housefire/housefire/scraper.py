@@ -8,8 +8,11 @@ import random as r
 logger = get_logger(__name__)
 
 
-async def _pld_scrape(tab: uc.Tab, temp_dir_path: str) -> pd.DataFrame:
+async def _pld_scrape(driver: uc.Browser, temp_dir_path: str) -> pd.DataFrame:
     # find and click the hidden button to download the csv
+    start_url = "https://www.prologis.com/property-search?at=building%3Bland%3Bland_lease%3Bland_sale%3Bspec_building&bounding_box%5Btop_left%5D%5B0%5D=-143.31501&bounding_box%5Btop_left%5D%5B1%5D=77.44197&bounding_box%5Bbottom_right%5D%5B0%5D=163.24749&bounding_box%5Bbottom_right%5D%5B1%5D=-60.98419&ms=uscustomary&lsr%5Bmin%5D=0&lsr%5Bmax%5D=9007199254740991&bsr%5Bmin%5D=0&bsr%5Bmax%5D=9007199254740991&so=metric_size_sort%2Cdesc&p=0&m=&an=0"
+    tab = await driver.get(start_url)
+
     download_button = await tab.select("#download_results")
     if download_button is None:
         raise Exception("could not find download button")
@@ -45,7 +48,10 @@ async def _pld_scrape(tab: uc.Tab, temp_dir_path: str) -> pd.DataFrame:
     return df
 
 
-async def _eqix_scrape(tab: uc.Tab, temp_dir_path: str) -> pd.DataFrame:
+async def _eqix_scrape(driver: uc.Browser, temp_dir_path: str) -> pd.DataFrame:
+    start_url = "https://www.equinix.com/data-centers"
+    tab = await driver.get(start_url)
+
     df_list = list()
     city_urls = await _eqix_scrape_city_urls(tab)
     logger.debug(f"found city urls: {city_urls}")
@@ -167,7 +173,10 @@ async def _eqix_scrape_single_property(tab: uc.Tab) -> pd.DataFrame:
     )
 
 
-async def _welltower_scrape(tab: uc.Tab, temp_dir_path: str) -> pd.DataFrame:
+async def _welltower_scrape(driver: uc.Browser, temp_dir_path: str) -> pd.DataFrame:
+    start_url = "https://medicaloffice.welltower.com/search?address=USA&min=null&max=null&moveInTiming="
+    tab = await driver.get(start_url)
+
     df_list = list()
     property_urls = await _welltower_scrape_property_urls(tab)
     logger.debug(f"found property urls: {property_urls}")
@@ -220,16 +229,115 @@ async def _welltower_scrape_single_property(tab: uc.Tab) -> pd.DataFrame:
     )
 
 
+async def _simon_scrape(driver: uc.Browser) -> pd.DataFrame:
+    us_start_url = "https://www.simon.com/mall"
+    international_start_url = "https://www.simon.com/mall/international"
+    us_tab = await driver.get(us_start_url, new_tab=True)
+    jiggle_time = r.randint(10, 70)
+    time.sleep(jiggle_time)
+    international_tab = await driver.get(international_start_url, new_tab=True)
+
+    us_link_name_location_tuples = await _simon_scrape_property_mall(us_tab)
+    international_link_name_location_tuples = await _simon_scrape_property_mall(
+        international_tab
+    )
+
+    us_df_list = [
+        await _simon_scrape_single_property_us(name, location)
+        for _, name, location in us_link_name_location_tuples
+    ]
+    international_df_list = [
+        await _simon_scrape_single_property_international(name, location)
+        for _, name, location in international_link_name_location_tuples
+    ]
+
+    return pd.concat(us_df_list + international_df_list)
+
+
+async def _simon_scrape_property_mall(tab: uc.Tab) -> list[tuple[str, str, str]]:
+    """
+    Scrape the property links, names, and locations from the simon mall page
+    returns tuple of (link, name, location)
+    """
+
+    properties_div = await tab.query_selector(".mall-list")
+    property_link_elements = await properties_div.query_selector_all("a")
+    property_links = [element.attrs["href"] for element in property_link_elements]
+    logger.debug(f"found property links: {property_links}")
+
+    property_names = [
+        (await element.query_selector(".mall-list-item-name")).text
+        for element in property_link_elements
+    ]
+    logger.debug(f"found property names: {property_names}")
+
+    property_locations = [
+        (await element.query_selector(".mall-list-item-location")).text
+        for element in property_link_elements
+    ]
+    logger.debug(f"found property locations: {property_locations}")
+
+    return zip(property_links, property_names, property_locations)
+
+
+async def _simon_scrape_single_property_us(
+    name_string: str, location_string: str
+) -> pd.DataFrame:
+    """
+    Scrape the name and address of a single property
+    """
+
+    name = name_string.strip()
+    address_parts = location_string.split(",")
+    city = address_parts[0].strip()
+    state = address_parts[1].strip()
+    country = "United States of America"
+
+    return pd.DataFrame(
+        {
+            "name": [name],
+            "address": [None],
+            "city": [city],
+            "state": [state],
+            "zip": [None],
+            "country": [country],
+        }
+    )
+
+
+async def _simon_scrape_single_property_international(
+    name_string: str, location_string: str
+) -> pd.DataFrame:
+    """
+    Scrape the name and address of a single property
+    """
+
+    name = name_string.strip()
+    address_parts = location_string.split(",")
+    city = address_parts[0].strip()
+    state = None
+    country = address_parts[-1].strip()
+
+    if len(address_parts) > 2:
+        state = address_parts[-2].strip()
+
+    return pd.DataFrame(
+        {
+            "name": [name],
+            "address": [None],
+            "city": [city],
+            "state": [state],
+            "zip": [None],
+            "country": [country],
+        }
+    )
+
+
 SCRAPERS = {
     "pld": _pld_scrape,
     "eqix": _eqix_scrape,
     "well": _welltower_scrape,
-}
-
-START_URLS = {
-    "pld": "https://www.prologis.com/property-search?at=building%3Bland%3Bland_lease%3Bland_sale%3Bspec_building&bounding_box%5Btop_left%5D%5B0%5D=-143.31501&bounding_box%5Btop_left%5D%5B1%5D=77.44197&bounding_box%5Bbottom_right%5D%5B0%5D=163.24749&bounding_box%5Bbottom_right%5D%5B1%5D=-60.98419&ms=uscustomary&lsr%5Bmin%5D=0&lsr%5Bmax%5D=9007199254740991&bsr%5Bmin%5D=0&bsr%5Bmax%5D=9007199254740991&so=metric_size_sort%2Cdesc&p=0&m=&an=0",
-    "eqix": "https://www.equinix.com/data-centers",
-    "well": "https://medicaloffice.welltower.com/search?address=USA&min=null&max=null&moveInTiming=",
+    "spg": _simon_scrape,
 }
 
 
@@ -239,14 +347,9 @@ async def scrape_wrapper(
     """
     Scrape data and log
     """
-    start_url = START_URLS[ticker]
     custom_scraper = SCRAPERS[ticker]
-
     logger.debug(f"Scraping data for REIT: {ticker}")
-    logger.debug(f"navigating to {start_url}")
-    tab = await driver.get(start_url)
-    logger.debug(f"Navigated to {start_url}")
-    scraped_data = await custom_scraper(tab, temp_dir_path)
+    scraped_data = await custom_scraper(driver, temp_dir_path)
     logger.debug(f"Scraped data for REIT: {ticker}, df: {scraped_data}")
     return scraped_data
 
@@ -303,5 +406,18 @@ if __name__ == "__main__":
         # print("SCRAPED SINGLE PROPERTY")
         # print(await _welltower_scrape_single_property(tab))
         # print("\n\n\n")
+
+        # SIMON
+        # tab = await browser.get("https://www.simon.com/mall")
+        # properties_div = await tab.query_selector(".mall-list")
+        # property_link_elements = await properties_div.query_selector_all("a")
+        # property_links = [element.attrs["href"] for element in property_link_elements]
+        # print(property_links)
+
+        # property_names = [(await element.query_selector(".mall-list-item-name")).text for element in property_link_elements]
+        # property_locations = [(await element.query_selector(".mall-list-item-location")).text for element in property_link_elements]
+        # print(property_names)
+        # print(property_locations)
+        print(await _simon_scrape(browser))
 
     uc.loop().run_until_complete(main())
