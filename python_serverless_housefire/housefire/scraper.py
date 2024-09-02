@@ -59,7 +59,7 @@ async def _eqix_scrape(driver: uc.Browser, temp_dir_path: str) -> pd.DataFrame:
     for city_url in city_urls:
         jiggle_time = r.randint(10, 70)
         time.sleep(jiggle_time)
-        city_tab = await tab.browser.get(city_url, new_tab=True)
+        city_tab = await driver.get(city_url, new_tab=True)
         try:
             property_urls.extend(await _eqix_scrape_single_city_property_urls(city_tab))
         except Exception as e:
@@ -71,7 +71,7 @@ async def _eqix_scrape(driver: uc.Browser, temp_dir_path: str) -> pd.DataFrame:
     for property_url in property_urls:
         jiggle_time = r.randint(10, 70)
         time.sleep(jiggle_time)
-        property_tab = await tab.browser.get(property_url, new_tab=True)
+        property_tab = await driver.get(property_url, new_tab=True)
         try:
             df = await _eqix_scrape_single_property(property_tab)
             df_list.append(df)
@@ -184,7 +184,7 @@ async def _welltower_scrape(driver: uc.Browser, temp_dir_path: str) -> pd.DataFr
     for property_url in property_urls:
         jiggle_time = r.randint(10, 70)
         time.sleep(jiggle_time)
-        property_tab = await tab.browser.get(property_url, new_tab=True)
+        property_tab = await driver.get(property_url, new_tab=True)
         try:
             df = await _welltower_scrape_single_property(property_tab)
             df_list.append(df)
@@ -333,11 +333,56 @@ async def _simon_scrape_single_property_international(
     )
 
 
+async def _digital_realty_scrape(
+    driver: uc.Browser, temp_dir_path: str
+) -> pd.DataFrame:
+    start_url = "https://www.digitalrealty.com/data-centers"
+    tab = await driver.get(start_url)
+
+    df_list = list()
+    property_urls = await _digital_realty_scrape_region_urls(tab)
+    logger.debug(f"found property urls: {property_urls}")
+
+    for property_url in property_urls:
+        jiggle_time = r.randint(10, 70)
+        time.sleep(jiggle_time)
+        property_tab = await driver.get(property_url, new_tab=True)
+        try:
+            df = await _digital_realty_scrape_single_region(property_tab)
+            df_list.append(df)
+        except Exception as e:
+            logger.warn(f"error scraping property: {property_url}, {e}")
+        finally:
+            await property_tab.close()
+
+    return pd.concat(df_list)
+
+
+async def _digital_realty_scrape_region_urls(tab: uc.Tab) -> list[str]:
+    link_elements = await tab.query_selector_all(".region")
+    base_url = "https://www.digitalrealty.com"
+    return [base_url + element.attrs["href"] for element in link_elements]
+
+
+async def _digital_realty_scrape_single_region(tab: uc.Tab) -> pd.DataFrame:
+    property_divs = await tab.query_selector_all(".a-metro-map-link")
+    names = [(await div.query_selector(".title")).text.strip() for div in property_divs]
+    address_parts = [
+        (await div.query_selector(".sub-title")).text.strip() for div in property_divs
+    ]
+    sq_footage_parts = [
+        (await div.query_selector(".bottom-part")).children[0].text.strip()
+        for div in property_divs
+    ]
+    return pd.DataFrame()
+
+
 SCRAPERS = {
     "pld": _pld_scrape,
     "eqix": _eqix_scrape,
     "well": _welltower_scrape,
     "spg": _simon_scrape,
+    "dlr": _digital_realty_scrape,
 }
 
 
@@ -418,6 +463,6 @@ if __name__ == "__main__":
         # property_locations = [(await element.query_selector(".mall-list-item-location")).text for element in property_link_elements]
         # print(property_names)
         # print(property_locations)
-        print(await _simon_scrape(browser))
+        # print(await _simon_scrape(browser))
 
     uc.loop().run_until_complete(main())
