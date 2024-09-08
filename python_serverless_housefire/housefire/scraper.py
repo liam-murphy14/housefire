@@ -365,16 +365,25 @@ async def _digital_realty_scrape_region_urls(tab: uc.Tab) -> list[str]:
 
 
 async def _digital_realty_scrape_single_region(tab: uc.Tab) -> pd.DataFrame:
+    time.sleep(30)
     property_divs = await tab.query_selector_all(".a-metro-map-link")
-    names = [(await div.query_selector(".title")).text.strip() for div in property_divs]
-    address_parts = [
+    names = [
+        (await div.query_selector(".title")).text_all.strip() for div in property_divs
+    ]
+    address_inputs = [
         (await div.query_selector(".sub-title")).text.strip() for div in property_divs
     ]
     sq_footage_parts = [
         (await div.query_selector(".bottom-part")).children[0].text.strip()
         for div in property_divs
     ]
-    return pd.DataFrame()
+    return pd.DataFrame(
+        {
+            "name": names,
+            "address": address_inputs,
+            "squareFootage": sq_footage_parts,
+        }
+    )
 
 
 SCRAPERS = {
@@ -464,5 +473,12 @@ if __name__ == "__main__":
         # print(property_names)
         # print(property_locations)
         # print(await _simon_scrape(browser))
+
+        # DIGITAL REALTY
+        tab = await browser.get(
+            "https://www.digitalrealty.com/data-centers/americas/chicago"
+        )
+        df = await _digital_realty_scrape_single_region(tab)
+        print(df)
 
     uc.loop().run_until_complete(main())

@@ -1,9 +1,10 @@
 { buildPythonPackage
+, googlemaps
+, nodriver
 , pythonOlder
 , pandas
 , python-dotenv
 , requests
-, nodriver
 , setuptools
 }:
 
@@ -21,6 +22,7 @@ buildPythonPackage {
     python-dotenv
     requests
     nodriver
+    googlemaps
   ];
 
   build-system = [ setuptools ];

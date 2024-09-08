@@ -2,7 +2,6 @@ import sys
 import dotenv
 from housefire.scraper import (
     SCRAPERS,
-    START_URLS,
     scrape_wrapper,
 )
 from housefire.transformer import (
@@ -16,7 +15,7 @@ from housefire.utils import (
     get_env_nonnull_file,
     get_env_nonnull,
 )
-from housefire.housefire_api import HousefireAPI
+from housefire.dependency import HousefireAPI
 from housefire.logger import get_logger
 
 logger = get_logger(__name__)
@@ -55,11 +54,7 @@ async def main():
         ticker = sys.argv[1].lower()
         logger.info(f"Scraping data for ticker: {ticker}")
 
-        if (
-            ticker not in SCRAPERS
-            or ticker not in START_URLS
-            or ticker not in TRANSFORMERS
-        ):
+        if ticker not in SCRAPERS or ticker not in TRANSFORMERS:
             raise ValueError(f"Unsupported ticker: {ticker}")
 
         properties_dataframe = await scrape_wrapper(driver, ticker, TEMP_DIR_PATH)

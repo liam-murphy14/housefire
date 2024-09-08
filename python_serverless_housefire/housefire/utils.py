@@ -95,6 +95,20 @@ def delete_temp_dir(temp_dir_path: str) -> None:
         logger.error(f"Error deleting directory at {temp_dir_path}: {e}", exc_info=True)
 
 
+def housefire_geocode_to_housefire_address(housefire_geocode: dict) -> dict:
+    return {
+        "addressInput": housefire_geocode["addressInput"],
+        "address": f"{housefire_geocode['streetNumber']} {housefire_geocode['route']}",
+        "neighborhood": housefire_geocode["locality"],
+        "city": housefire_geocode["administrativeAreaLevel2"],
+        "state": housefire_geocode["administrativeAreaLevel1"],
+        "zip": housefire_geocode["postalCode"],
+        "country": housefire_geocode["country"],
+        "latitude": housefire_geocode["latitude"],
+        "longitude": housefire_geocode["longitude"],
+    }
+
+
 def df_to_request(df: pd.DataFrame):
     """
     Convert a pandas DataFrame to a list of dictionaries

@@ -1,9 +1,22 @@
 import pandas as pd
 import numpy as np
-from housefire.housefire_api import HousefireAPI
+from housefire.dependency import HousefireAPI, GoogleGeocodeAPI
 from housefire.logger import get_logger
+from housefire.utils import (
+    get_env_nonnull,
+    parse_and_convert_area,
+    df_to_request,
+    parse_area_string,
+    housefire_geocode_to_housefire_address,
+)
 import dotenv
-from housefire.utils import get_env_nonnull, parse_and_convert_area, df_to_request
+
+dotenv.load_dotenv()
+
+housefire_api_client = HousefireAPI(get_env_nonnull("HOUSEFIRE_API_KEY"))
+google_geocode_api_client = GoogleGeocodeAPI(
+    get_env_nonnull("GOOGLE_MAPS_API_KEY"), housefire_api_client
+)
 
 logger = get_logger(__name__)
 
@@ -67,11 +80,47 @@ def _pld_transform(df: pd.DataFrame) -> pd.DataFrame:
     )
     df = df.astype({"zip": "str"})
     df["squareFootage"] = df["squareFootage"].apply(parse_and_convert_area)
+    df["addressInput"] = df.agg(
+        lambda x: f"{x['address']}, {x['city']}, {x['state']} {x['zip']}, {x['country']}",
+        axis=1,
+    )
     return df
+
+
+def _eqix_transform(df: pd.DataFrame) -> pd.DataFrame:
+    return df
+
+
+def _welltower_transform(df: pd.DataFrame) -> pd.DataFrame:
+    return df
+
+
+def _simon_transform(df: pd.DataFrame) -> pd.DataFrame:
+    return df
+
+
+def _digital_realty_transform(df: pd.DataFrame) -> pd.DataFrame:
+    df["squareFootage"] = df["squareFootage"].apply(parse_area_string)
+    address_inputs = df["address"].to_list()
+    df.drop(columns=["address"], inplace=True)
+    records = df.to_dict(orient="records")
+    housefire_geocodes = google_geocode_api_client.geocode_addresses(address_inputs)
+    for address_input, record in zip(address_inputs, records):
+        record["addressInput"] = address_input
+        if address_input not in housefire_geocodes:
+            logger.error(f"Failed to geocode address: {address_input}")
+            continue
+        housefire_geocode = housefire_geocodes[address_input]
+        record.update(housefire_geocode_to_housefire_address(housefire_geocode))
+    return pd.DataFrame(records)
 
 
 TRANSFORMERS = {
     "pld": _pld_transform,
+    "eqix": _eqix_transform,
+    "well": _welltower_transform,
+    "spg": _simon_transform,
+    "dlr": _digital_realty_transform,
 }
 
 
@@ -92,14 +141,27 @@ def transform_wrapper(data: pd.DataFrame, ticker: str) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    dotenv.load_dotenv()
 
-    HOUSEFIRE_API_KEY = get_env_nonnull("HOUSEFIRE_API_KEY")
+    # HOUSEFIRE TEST
+    # dotenv.load_dotenv()
 
-    api = HousefireAPI(HOUSEFIRE_API_KEY)
-    api.base_url = "http://localhost:5173/api/"
-    pld_test_df = pd.read_csv("/Users/liammurphy/Downloads/Data_export.csv")
-    transformed = transform_wrapper(pld_test_df, "pld")
-    request = df_to_request(transformed)
-    response = api.post_properties(request)
-    logger.info(f"resjsno: {response.json()}")
+    # HOUSEFIRE_API_KEY = get_env_nonnull("HOUSEFIRE_API_KEY")
+
+    # api = HousefireAPI(HOUSEFIRE_API_KEY)
+    # api.base_url = "http://localhost:5173/api/"
+    # pld_test_df = pd.read_csv("/Users/liammurphy/Downloads/Data_export.csv")
+    # transformed = transform_wrapper(pld_test_df, "pld")
+    # request = df_to_request(transformed)
+    # response = api.post_properties(request)
+    # logger.info(f"resjsno: {response.json()}")
+
+    # GOOGLE MAPS TEST
+
+    realty_df = pd.DataFrame(
+        {
+            "name": ["Chicago CH2"],
+            "address": ["2200 Busse Road, Elk Grove Village, IL 60007"],
+            "squareFootage": ["485,000"],
+        }
+    )
+    print(_digital_realty_transform(realty_df))
