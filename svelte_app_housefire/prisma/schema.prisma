@@ -43,19 +43,19 @@ model Property {
 }
 
 model Geocode {
-  id         String   @id @default(cuid())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  addressInput    String @unique
-  streetNumber    String?
-  route           String?
-  locality        String?
+  id                       String   @id @default(cuid())
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  addressInput             String   @unique
+  streetNumber             String?
+  route                    String?
+  locality                 String?
   administrativeAreaLevel1 String?
   administrativeAreaLevel2 String?
-  country         String?
-  postalCode      String?
-  formattedAddress String?
-  globalPlusCode  String?
-  latitude   Float
-  longitude  Float
+  country                  String?
+  postalCode               String?
+  formattedAddress         String?
+  globalPlusCode           String?
+  latitude                 Float
+  longitude                Float
 }
