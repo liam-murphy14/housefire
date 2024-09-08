@@ -14,7 +14,9 @@ export const TransactionIsolationLevelSchema = z.enum(['ReadUncommitted','ReadCo
 
 export const ReitScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','ticker']);
 
-export const PropertyScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','name','address','address2','neighborhood','city','state','zip','country','latitude','longitude','squareFootage','reitTicker']);
+export const PropertyScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','addressInput','name','address','address2','neighborhood','city','state','zip','country','latitude','longitude','squareFootage','reitTicker']);
+
+export const GeocodeScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','addressInput','streetNumber','route','locality','administrativeAreaLevel1','administrativeAreaLevel2','country','postalCode','formattedAddress','globalPlusCode','latitude','longitude']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
@@ -46,6 +48,7 @@ export const PropertySchema = z.object({
   id: z.string().cuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
+  addressInput: z.string(),
   name: z.string().nullable(),
   address: z.string().nullable(),
   address2: z.string().nullable(),
@@ -61,6 +64,30 @@ export const PropertySchema = z.object({
 })
 
 export type Property = z.infer<typeof PropertySchema>
+
+/////////////////////////////////////////
+// GEOCODE SCHEMA
+/////////////////////////////////////////
+
+export const GeocodeSchema = z.object({
+  id: z.string().cuid(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  addressInput: z.string(),
+  streetNumber: z.string().nullable(),
+  route: z.string().nullable(),
+  locality: z.string().nullable(),
+  administrativeAreaLevel1: z.string().nullable(),
+  administrativeAreaLevel2: z.string().nullable(),
+  country: z.string().nullable(),
+  postalCode: z.string().nullable(),
+  formattedAddress: z.string().nullable(),
+  globalPlusCode: z.string().nullable(),
+  latitude: z.number(),
+  longitude: z.number(),
+})
+
+export type Geocode = z.infer<typeof GeocodeSchema>
 
 /////////////////////////////////////////
 // SELECT & INCLUDE
@@ -112,6 +139,7 @@ export const PropertySelectSchema: z.ZodType<Prisma.PropertySelect> = z.object({
   id: z.boolean().optional(),
   createdAt: z.boolean().optional(),
   updatedAt: z.boolean().optional(),
+  addressInput: z.boolean().optional(),
   name: z.boolean().optional(),
   address: z.boolean().optional(),
   address2: z.boolean().optional(),
@@ -125,6 +153,27 @@ export const PropertySelectSchema: z.ZodType<Prisma.PropertySelect> = z.object({
   squareFootage: z.boolean().optional(),
   reitTicker: z.boolean().optional(),
   reit: z.union([z.boolean(),z.lazy(() => ReitArgsSchema)]).optional(),
+}).strict()
+
+// GEOCODE
+//------------------------------------------------------
+
+export const GeocodeSelectSchema: z.ZodType<Prisma.GeocodeSelect> = z.object({
+  id: z.boolean().optional(),
+  createdAt: z.boolean().optional(),
+  updatedAt: z.boolean().optional(),
+  addressInput: z.boolean().optional(),
+  streetNumber: z.boolean().optional(),
+  route: z.boolean().optional(),
+  locality: z.boolean().optional(),
+  administrativeAreaLevel1: z.boolean().optional(),
+  administrativeAreaLevel2: z.boolean().optional(),
+  country: z.boolean().optional(),
+  postalCode: z.boolean().optional(),
+  formattedAddress: z.boolean().optional(),
+  globalPlusCode: z.boolean().optional(),
+  latitude: z.boolean().optional(),
+  longitude: z.boolean().optional(),
 }).strict()
 
 
@@ -201,6 +250,7 @@ export const PropertyWhereInputSchema: z.ZodType<Prisma.PropertyWhereInput> = z.
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  addressInput: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   name: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   address: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   address2: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
@@ -220,6 +270,7 @@ export const PropertyOrderByWithRelationInputSchema: z.ZodType<Prisma.PropertyOr
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  addressInput: z.lazy(() => SortOrderSchema).optional(),
   name: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   address: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   address2: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -235,11 +286,21 @@ export const PropertyOrderByWithRelationInputSchema: z.ZodType<Prisma.PropertyOr
   reit: z.lazy(() => ReitOrderByWithRelationInputSchema).optional()
 }).strict();
 
-export const PropertyWhereUniqueInputSchema: z.ZodType<Prisma.PropertyWhereUniqueInput> = z.object({
-  id: z.string().cuid()
-})
+export const PropertyWhereUniqueInputSchema: z.ZodType<Prisma.PropertyWhereUniqueInput> = z.union([
+  z.object({
+    id: z.string().cuid(),
+    addressInput: z.string()
+  }),
+  z.object({
+    id: z.string().cuid(),
+  }),
+  z.object({
+    addressInput: z.string(),
+  }),
+])
 .and(z.object({
   id: z.string().cuid().optional(),
+  addressInput: z.string().optional(),
   AND: z.union([ z.lazy(() => PropertyWhereInputSchema),z.lazy(() => PropertyWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => PropertyWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => PropertyWhereInputSchema),z.lazy(() => PropertyWhereInputSchema).array() ]).optional(),
@@ -264,6 +325,7 @@ export const PropertyOrderByWithAggregationInputSchema: z.ZodType<Prisma.Propert
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  addressInput: z.lazy(() => SortOrderSchema).optional(),
   name: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   address: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   address2: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -290,6 +352,7 @@ export const PropertyScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Prop
   id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  addressInput: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   name: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   address: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   address2: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
@@ -302,6 +365,122 @@ export const PropertyScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Prop
   longitude: z.union([ z.lazy(() => FloatNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
   squareFootage: z.union([ z.lazy(() => FloatNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
   reitTicker: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+}).strict();
+
+export const GeocodeWhereInputSchema: z.ZodType<Prisma.GeocodeWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => GeocodeWhereInputSchema),z.lazy(() => GeocodeWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => GeocodeWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => GeocodeWhereInputSchema),z.lazy(() => GeocodeWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  addressInput: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  streetNumber: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  route: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  locality: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  administrativeAreaLevel1: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  administrativeAreaLevel2: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  country: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  postalCode: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  formattedAddress: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  globalPlusCode: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  latitude: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  longitude: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+}).strict();
+
+export const GeocodeOrderByWithRelationInputSchema: z.ZodType<Prisma.GeocodeOrderByWithRelationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  addressInput: z.lazy(() => SortOrderSchema).optional(),
+  streetNumber: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  route: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  locality: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  administrativeAreaLevel1: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  administrativeAreaLevel2: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  country: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  postalCode: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  formattedAddress: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  globalPlusCode: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  latitude: z.lazy(() => SortOrderSchema).optional(),
+  longitude: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const GeocodeWhereUniqueInputSchema: z.ZodType<Prisma.GeocodeWhereUniqueInput> = z.union([
+  z.object({
+    id: z.string().cuid(),
+    addressInput: z.string()
+  }),
+  z.object({
+    id: z.string().cuid(),
+  }),
+  z.object({
+    addressInput: z.string(),
+  }),
+])
+.and(z.object({
+  id: z.string().cuid().optional(),
+  addressInput: z.string().optional(),
+  AND: z.union([ z.lazy(() => GeocodeWhereInputSchema),z.lazy(() => GeocodeWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => GeocodeWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => GeocodeWhereInputSchema),z.lazy(() => GeocodeWhereInputSchema).array() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  streetNumber: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  route: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  locality: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  administrativeAreaLevel1: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  administrativeAreaLevel2: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  country: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  postalCode: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  formattedAddress: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  globalPlusCode: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  latitude: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  longitude: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+}).strict());
+
+export const GeocodeOrderByWithAggregationInputSchema: z.ZodType<Prisma.GeocodeOrderByWithAggregationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  addressInput: z.lazy(() => SortOrderSchema).optional(),
+  streetNumber: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  route: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  locality: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  administrativeAreaLevel1: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  administrativeAreaLevel2: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  country: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  postalCode: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  formattedAddress: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  globalPlusCode: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  latitude: z.lazy(() => SortOrderSchema).optional(),
+  longitude: z.lazy(() => SortOrderSchema).optional(),
+  _count: z.lazy(() => GeocodeCountOrderByAggregateInputSchema).optional(),
+  _avg: z.lazy(() => GeocodeAvgOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => GeocodeMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => GeocodeMinOrderByAggregateInputSchema).optional(),
+  _sum: z.lazy(() => GeocodeSumOrderByAggregateInputSchema).optional()
+}).strict();
+
+export const GeocodeScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.GeocodeScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => GeocodeScalarWhereWithAggregatesInputSchema),z.lazy(() => GeocodeScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => GeocodeScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => GeocodeScalarWhereWithAggregatesInputSchema),z.lazy(() => GeocodeScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  addressInput: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  streetNumber: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  route: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  locality: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  administrativeAreaLevel1: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  administrativeAreaLevel2: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  country: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  postalCode: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  formattedAddress: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  globalPlusCode: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  latitude: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
+  longitude: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
 }).strict();
 
 export const ReitCreateInputSchema: z.ZodType<Prisma.ReitCreateInput> = z.object({
@@ -361,6 +540,7 @@ export const PropertyCreateInputSchema: z.ZodType<Prisma.PropertyCreateInput> = 
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
+  addressInput: z.string(),
   name: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   address2: z.string().optional().nullable(),
@@ -379,6 +559,7 @@ export const PropertyUncheckedCreateInputSchema: z.ZodType<Prisma.PropertyUnchec
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
+  addressInput: z.string(),
   name: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   address2: z.string().optional().nullable(),
@@ -397,6 +578,7 @@ export const PropertyUpdateInputSchema: z.ZodType<Prisma.PropertyUpdateInput> = 
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  addressInput: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address2: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -415,6 +597,7 @@ export const PropertyUncheckedUpdateInputSchema: z.ZodType<Prisma.PropertyUnchec
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  addressInput: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address2: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -433,6 +616,7 @@ export const PropertyCreateManyInputSchema: z.ZodType<Prisma.PropertyCreateManyI
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
+  addressInput: z.string(),
   name: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   address2: z.string().optional().nullable(),
@@ -451,6 +635,7 @@ export const PropertyUpdateManyMutationInputSchema: z.ZodType<Prisma.PropertyUpd
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  addressInput: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address2: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -468,6 +653,7 @@ export const PropertyUncheckedUpdateManyInputSchema: z.ZodType<Prisma.PropertyUn
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  addressInput: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address2: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -480,6 +666,132 @@ export const PropertyUncheckedUpdateManyInputSchema: z.ZodType<Prisma.PropertyUn
   longitude: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   squareFootage: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   reitTicker: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const GeocodeCreateInputSchema: z.ZodType<Prisma.GeocodeCreateInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  addressInput: z.string(),
+  streetNumber: z.string().optional().nullable(),
+  route: z.string().optional().nullable(),
+  locality: z.string().optional().nullable(),
+  administrativeAreaLevel1: z.string().optional().nullable(),
+  administrativeAreaLevel2: z.string().optional().nullable(),
+  country: z.string().optional().nullable(),
+  postalCode: z.string().optional().nullable(),
+  formattedAddress: z.string().optional().nullable(),
+  globalPlusCode: z.string().optional().nullable(),
+  latitude: z.number(),
+  longitude: z.number()
+}).strict();
+
+export const GeocodeUncheckedCreateInputSchema: z.ZodType<Prisma.GeocodeUncheckedCreateInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  addressInput: z.string(),
+  streetNumber: z.string().optional().nullable(),
+  route: z.string().optional().nullable(),
+  locality: z.string().optional().nullable(),
+  administrativeAreaLevel1: z.string().optional().nullable(),
+  administrativeAreaLevel2: z.string().optional().nullable(),
+  country: z.string().optional().nullable(),
+  postalCode: z.string().optional().nullable(),
+  formattedAddress: z.string().optional().nullable(),
+  globalPlusCode: z.string().optional().nullable(),
+  latitude: z.number(),
+  longitude: z.number()
+}).strict();
+
+export const GeocodeUpdateInputSchema: z.ZodType<Prisma.GeocodeUpdateInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  addressInput: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  streetNumber: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  route: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  locality: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  administrativeAreaLevel1: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  administrativeAreaLevel2: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  country: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  postalCode: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  formattedAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  globalPlusCode: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  latitude: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  longitude: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const GeocodeUncheckedUpdateInputSchema: z.ZodType<Prisma.GeocodeUncheckedUpdateInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  addressInput: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  streetNumber: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  route: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  locality: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  administrativeAreaLevel1: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  administrativeAreaLevel2: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  country: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  postalCode: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  formattedAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  globalPlusCode: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  latitude: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  longitude: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const GeocodeCreateManyInputSchema: z.ZodType<Prisma.GeocodeCreateManyInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  addressInput: z.string(),
+  streetNumber: z.string().optional().nullable(),
+  route: z.string().optional().nullable(),
+  locality: z.string().optional().nullable(),
+  administrativeAreaLevel1: z.string().optional().nullable(),
+  administrativeAreaLevel2: z.string().optional().nullable(),
+  country: z.string().optional().nullable(),
+  postalCode: z.string().optional().nullable(),
+  formattedAddress: z.string().optional().nullable(),
+  globalPlusCode: z.string().optional().nullable(),
+  latitude: z.number(),
+  longitude: z.number()
+}).strict();
+
+export const GeocodeUpdateManyMutationInputSchema: z.ZodType<Prisma.GeocodeUpdateManyMutationInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  addressInput: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  streetNumber: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  route: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  locality: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  administrativeAreaLevel1: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  administrativeAreaLevel2: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  country: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  postalCode: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  formattedAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  globalPlusCode: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  latitude: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  longitude: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const GeocodeUncheckedUpdateManyInputSchema: z.ZodType<Prisma.GeocodeUncheckedUpdateManyInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  addressInput: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  streetNumber: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  route: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  locality: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  administrativeAreaLevel1: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  administrativeAreaLevel2: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  country: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  postalCode: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  formattedAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  globalPlusCode: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  latitude: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  longitude: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const StringFilterSchema: z.ZodType<Prisma.StringFilter> = z.object({
@@ -611,6 +923,7 @@ export const PropertyCountOrderByAggregateInputSchema: z.ZodType<Prisma.Property
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  addressInput: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   address: z.lazy(() => SortOrderSchema).optional(),
   address2: z.lazy(() => SortOrderSchema).optional(),
@@ -635,6 +948,7 @@ export const PropertyMaxOrderByAggregateInputSchema: z.ZodType<Prisma.PropertyMa
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  addressInput: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   address: z.lazy(() => SortOrderSchema).optional(),
   address2: z.lazy(() => SortOrderSchema).optional(),
@@ -653,6 +967,7 @@ export const PropertyMinOrderByAggregateInputSchema: z.ZodType<Prisma.PropertyMi
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  addressInput: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   address: z.lazy(() => SortOrderSchema).optional(),
   address2: z.lazy(() => SortOrderSchema).optional(),
@@ -705,6 +1020,97 @@ export const FloatNullableWithAggregatesFilterSchema: z.ZodType<Prisma.FloatNull
   _sum: z.lazy(() => NestedFloatNullableFilterSchema).optional(),
   _min: z.lazy(() => NestedFloatNullableFilterSchema).optional(),
   _max: z.lazy(() => NestedFloatNullableFilterSchema).optional()
+}).strict();
+
+export const FloatFilterSchema: z.ZodType<Prisma.FloatFilter> = z.object({
+  equals: z.number().optional(),
+  in: z.number().array().optional(),
+  notIn: z.number().array().optional(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedFloatFilterSchema) ]).optional(),
+}).strict();
+
+export const GeocodeCountOrderByAggregateInputSchema: z.ZodType<Prisma.GeocodeCountOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  addressInput: z.lazy(() => SortOrderSchema).optional(),
+  streetNumber: z.lazy(() => SortOrderSchema).optional(),
+  route: z.lazy(() => SortOrderSchema).optional(),
+  locality: z.lazy(() => SortOrderSchema).optional(),
+  administrativeAreaLevel1: z.lazy(() => SortOrderSchema).optional(),
+  administrativeAreaLevel2: z.lazy(() => SortOrderSchema).optional(),
+  country: z.lazy(() => SortOrderSchema).optional(),
+  postalCode: z.lazy(() => SortOrderSchema).optional(),
+  formattedAddress: z.lazy(() => SortOrderSchema).optional(),
+  globalPlusCode: z.lazy(() => SortOrderSchema).optional(),
+  latitude: z.lazy(() => SortOrderSchema).optional(),
+  longitude: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const GeocodeAvgOrderByAggregateInputSchema: z.ZodType<Prisma.GeocodeAvgOrderByAggregateInput> = z.object({
+  latitude: z.lazy(() => SortOrderSchema).optional(),
+  longitude: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const GeocodeMaxOrderByAggregateInputSchema: z.ZodType<Prisma.GeocodeMaxOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  addressInput: z.lazy(() => SortOrderSchema).optional(),
+  streetNumber: z.lazy(() => SortOrderSchema).optional(),
+  route: z.lazy(() => SortOrderSchema).optional(),
+  locality: z.lazy(() => SortOrderSchema).optional(),
+  administrativeAreaLevel1: z.lazy(() => SortOrderSchema).optional(),
+  administrativeAreaLevel2: z.lazy(() => SortOrderSchema).optional(),
+  country: z.lazy(() => SortOrderSchema).optional(),
+  postalCode: z.lazy(() => SortOrderSchema).optional(),
+  formattedAddress: z.lazy(() => SortOrderSchema).optional(),
+  globalPlusCode: z.lazy(() => SortOrderSchema).optional(),
+  latitude: z.lazy(() => SortOrderSchema).optional(),
+  longitude: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const GeocodeMinOrderByAggregateInputSchema: z.ZodType<Prisma.GeocodeMinOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  addressInput: z.lazy(() => SortOrderSchema).optional(),
+  streetNumber: z.lazy(() => SortOrderSchema).optional(),
+  route: z.lazy(() => SortOrderSchema).optional(),
+  locality: z.lazy(() => SortOrderSchema).optional(),
+  administrativeAreaLevel1: z.lazy(() => SortOrderSchema).optional(),
+  administrativeAreaLevel2: z.lazy(() => SortOrderSchema).optional(),
+  country: z.lazy(() => SortOrderSchema).optional(),
+  postalCode: z.lazy(() => SortOrderSchema).optional(),
+  formattedAddress: z.lazy(() => SortOrderSchema).optional(),
+  globalPlusCode: z.lazy(() => SortOrderSchema).optional(),
+  latitude: z.lazy(() => SortOrderSchema).optional(),
+  longitude: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const GeocodeSumOrderByAggregateInputSchema: z.ZodType<Prisma.GeocodeSumOrderByAggregateInput> = z.object({
+  latitude: z.lazy(() => SortOrderSchema).optional(),
+  longitude: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const FloatWithAggregatesFilterSchema: z.ZodType<Prisma.FloatWithAggregatesFilter> = z.object({
+  equals: z.number().optional(),
+  in: z.number().array().optional(),
+  notIn: z.number().array().optional(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedFloatWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _avg: z.lazy(() => NestedFloatFilterSchema).optional(),
+  _sum: z.lazy(() => NestedFloatFilterSchema).optional(),
+  _min: z.lazy(() => NestedFloatFilterSchema).optional(),
+  _max: z.lazy(() => NestedFloatFilterSchema).optional()
 }).strict();
 
 export const PropertyCreateNestedManyWithoutReitInputSchema: z.ZodType<Prisma.PropertyCreateNestedManyWithoutReitInput> = z.object({
@@ -781,6 +1187,14 @@ export const ReitUpdateOneRequiredWithoutPropertiesNestedInputSchema: z.ZodType<
   upsert: z.lazy(() => ReitUpsertWithoutPropertiesInputSchema).optional(),
   connect: z.lazy(() => ReitWhereUniqueInputSchema).optional(),
   update: z.union([ z.lazy(() => ReitUpdateToOneWithWhereWithoutPropertiesInputSchema),z.lazy(() => ReitUpdateWithoutPropertiesInputSchema),z.lazy(() => ReitUncheckedUpdateWithoutPropertiesInputSchema) ]).optional(),
+}).strict();
+
+export const FloatFieldUpdateOperationsInputSchema: z.ZodType<Prisma.FloatFieldUpdateOperationsInput> = z.object({
+  set: z.number().optional(),
+  increment: z.number().optional(),
+  decrement: z.number().optional(),
+  multiply: z.number().optional(),
+  divide: z.number().optional()
 }).strict();
 
 export const NestedStringFilterSchema: z.ZodType<Prisma.NestedStringFilter> = z.object({
@@ -919,10 +1333,38 @@ export const NestedFloatNullableWithAggregatesFilterSchema: z.ZodType<Prisma.Nes
   _max: z.lazy(() => NestedFloatNullableFilterSchema).optional()
 }).strict();
 
+export const NestedFloatFilterSchema: z.ZodType<Prisma.NestedFloatFilter> = z.object({
+  equals: z.number().optional(),
+  in: z.number().array().optional(),
+  notIn: z.number().array().optional(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedFloatFilterSchema) ]).optional(),
+}).strict();
+
+export const NestedFloatWithAggregatesFilterSchema: z.ZodType<Prisma.NestedFloatWithAggregatesFilter> = z.object({
+  equals: z.number().optional(),
+  in: z.number().array().optional(),
+  notIn: z.number().array().optional(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedFloatWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _avg: z.lazy(() => NestedFloatFilterSchema).optional(),
+  _sum: z.lazy(() => NestedFloatFilterSchema).optional(),
+  _min: z.lazy(() => NestedFloatFilterSchema).optional(),
+  _max: z.lazy(() => NestedFloatFilterSchema).optional()
+}).strict();
+
 export const PropertyCreateWithoutReitInputSchema: z.ZodType<Prisma.PropertyCreateWithoutReitInput> = z.object({
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
+  addressInput: z.string(),
   name: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   address2: z.string().optional().nullable(),
@@ -940,6 +1382,7 @@ export const PropertyUncheckedCreateWithoutReitInputSchema: z.ZodType<Prisma.Pro
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
+  addressInput: z.string(),
   name: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   address2: z.string().optional().nullable(),
@@ -986,6 +1429,7 @@ export const PropertyScalarWhereInputSchema: z.ZodType<Prisma.PropertyScalarWher
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  addressInput: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   name: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   address: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   address2: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
@@ -1048,6 +1492,7 @@ export const PropertyCreateManyReitInputSchema: z.ZodType<Prisma.PropertyCreateM
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
+  addressInput: z.string(),
   name: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   address2: z.string().optional().nullable(),
@@ -1065,6 +1510,7 @@ export const PropertyUpdateWithoutReitInputSchema: z.ZodType<Prisma.PropertyUpda
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  addressInput: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address2: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -1082,6 +1528,7 @@ export const PropertyUncheckedUpdateWithoutReitInputSchema: z.ZodType<Prisma.Pro
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  addressInput: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address2: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -1099,6 +1546,7 @@ export const PropertyUncheckedUpdateManyWithoutReitInputSchema: z.ZodType<Prisma
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  addressInput: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address2: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -1240,6 +1688,63 @@ export const PropertyFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.PropertyFindU
   where: PropertyWhereUniqueInputSchema,
 }).strict() ;
 
+export const GeocodeFindFirstArgsSchema: z.ZodType<Prisma.GeocodeFindFirstArgs> = z.object({
+  select: GeocodeSelectSchema.optional(),
+  where: GeocodeWhereInputSchema.optional(),
+  orderBy: z.union([ GeocodeOrderByWithRelationInputSchema.array(),GeocodeOrderByWithRelationInputSchema ]).optional(),
+  cursor: GeocodeWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ GeocodeScalarFieldEnumSchema,GeocodeScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const GeocodeFindFirstOrThrowArgsSchema: z.ZodType<Prisma.GeocodeFindFirstOrThrowArgs> = z.object({
+  select: GeocodeSelectSchema.optional(),
+  where: GeocodeWhereInputSchema.optional(),
+  orderBy: z.union([ GeocodeOrderByWithRelationInputSchema.array(),GeocodeOrderByWithRelationInputSchema ]).optional(),
+  cursor: GeocodeWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ GeocodeScalarFieldEnumSchema,GeocodeScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const GeocodeFindManyArgsSchema: z.ZodType<Prisma.GeocodeFindManyArgs> = z.object({
+  select: GeocodeSelectSchema.optional(),
+  where: GeocodeWhereInputSchema.optional(),
+  orderBy: z.union([ GeocodeOrderByWithRelationInputSchema.array(),GeocodeOrderByWithRelationInputSchema ]).optional(),
+  cursor: GeocodeWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ GeocodeScalarFieldEnumSchema,GeocodeScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const GeocodeAggregateArgsSchema: z.ZodType<Prisma.GeocodeAggregateArgs> = z.object({
+  where: GeocodeWhereInputSchema.optional(),
+  orderBy: z.union([ GeocodeOrderByWithRelationInputSchema.array(),GeocodeOrderByWithRelationInputSchema ]).optional(),
+  cursor: GeocodeWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const GeocodeGroupByArgsSchema: z.ZodType<Prisma.GeocodeGroupByArgs> = z.object({
+  where: GeocodeWhereInputSchema.optional(),
+  orderBy: z.union([ GeocodeOrderByWithAggregationInputSchema.array(),GeocodeOrderByWithAggregationInputSchema ]).optional(),
+  by: GeocodeScalarFieldEnumSchema.array(),
+  having: GeocodeScalarWhereWithAggregatesInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const GeocodeFindUniqueArgsSchema: z.ZodType<Prisma.GeocodeFindUniqueArgs> = z.object({
+  select: GeocodeSelectSchema.optional(),
+  where: GeocodeWhereUniqueInputSchema,
+}).strict() ;
+
+export const GeocodeFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.GeocodeFindUniqueOrThrowArgs> = z.object({
+  select: GeocodeSelectSchema.optional(),
+  where: GeocodeWhereUniqueInputSchema,
+}).strict() ;
+
 export const ReitCreateArgsSchema: z.ZodType<Prisma.ReitCreateArgs> = z.object({
   select: ReitSelectSchema.optional(),
   include: ReitIncludeSchema.optional(),
@@ -1330,4 +1835,46 @@ export const PropertyUpdateManyArgsSchema: z.ZodType<Prisma.PropertyUpdateManyAr
 
 export const PropertyDeleteManyArgsSchema: z.ZodType<Prisma.PropertyDeleteManyArgs> = z.object({
   where: PropertyWhereInputSchema.optional(),
+}).strict() ;
+
+export const GeocodeCreateArgsSchema: z.ZodType<Prisma.GeocodeCreateArgs> = z.object({
+  select: GeocodeSelectSchema.optional(),
+  data: z.union([ GeocodeCreateInputSchema,GeocodeUncheckedCreateInputSchema ]),
+}).strict() ;
+
+export const GeocodeUpsertArgsSchema: z.ZodType<Prisma.GeocodeUpsertArgs> = z.object({
+  select: GeocodeSelectSchema.optional(),
+  where: GeocodeWhereUniqueInputSchema,
+  create: z.union([ GeocodeCreateInputSchema,GeocodeUncheckedCreateInputSchema ]),
+  update: z.union([ GeocodeUpdateInputSchema,GeocodeUncheckedUpdateInputSchema ]),
+}).strict() ;
+
+export const GeocodeCreateManyArgsSchema: z.ZodType<Prisma.GeocodeCreateManyArgs> = z.object({
+  data: z.union([ GeocodeCreateManyInputSchema,GeocodeCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const GeocodeCreateManyAndReturnArgsSchema: z.ZodType<Prisma.GeocodeCreateManyAndReturnArgs> = z.object({
+  data: z.union([ GeocodeCreateManyInputSchema,GeocodeCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const GeocodeDeleteArgsSchema: z.ZodType<Prisma.GeocodeDeleteArgs> = z.object({
+  select: GeocodeSelectSchema.optional(),
+  where: GeocodeWhereUniqueInputSchema,
+}).strict() ;
+
+export const GeocodeUpdateArgsSchema: z.ZodType<Prisma.GeocodeUpdateArgs> = z.object({
+  select: GeocodeSelectSchema.optional(),
+  data: z.union([ GeocodeUpdateInputSchema,GeocodeUncheckedUpdateInputSchema ]),
+  where: GeocodeWhereUniqueInputSchema,
+}).strict() ;
+
+export const GeocodeUpdateManyArgsSchema: z.ZodType<Prisma.GeocodeUpdateManyArgs> = z.object({
+  data: z.union([ GeocodeUpdateManyMutationInputSchema,GeocodeUncheckedUpdateManyInputSchema ]),
+  where: GeocodeWhereInputSchema.optional(),
+}).strict() ;
+
+export const GeocodeDeleteManyArgsSchema: z.ZodType<Prisma.GeocodeDeleteManyArgs> = z.object({
+  where: GeocodeWhereInputSchema.optional(),
 }).strict() ;
