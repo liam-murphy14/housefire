@@ -88,20 +88,14 @@ class GoogleGeocodeAPI:
             logger.debug(
                 f"checking if address input {address_input} is already in housefire"
             )
-            housefire_response_data = (
-                self.housefire_api_client.get_geocode_by_address_input(
-                    address_input
-                ).json()
-            )
-            logger.debug(
-                f"found housefire response data: {housefire_response_data} for address input {address_input}"
-            )
-            if housefire_response_data is not None:
+            housefire_res = self.housefire_api_client.get_geocode_by_address_input(address_input)
+            logger.debug(f"housefire response: {housefire_res}")
+            if housefire_res.status_code == 200:
                 logger.debug(f"address input {address_input} already in housefire")
                 results[address_input] = (
-                    housefire_response_data.data
+                    housefire_res.json().data
                 )  # ??? TODO: check this
-                time.sleep(1)
+                time.sleep(1) # hacky rate limit
                 continue
             logger.debug(f"geocoding address input {address_input}")
             google_geocode_response = self.client.geocode(address_input)
@@ -129,6 +123,7 @@ class GoogleGeocodeAPI:
                 housefire_geocode_response_data.data
             )  # ??? TODO: check this
             time.sleep(self.wait_time)
+        return results
 
     def __google_geocode_to_housefire_geocode(self, google_geocode: dict) -> dict:
         (
