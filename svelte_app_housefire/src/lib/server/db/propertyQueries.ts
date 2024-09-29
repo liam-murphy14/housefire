@@ -1,6 +1,22 @@
 import prisma from '$lib/server/db/prisma';
 import { type Property, Prisma } from '@prisma/client';
 
+export const getPropertyById: (id: string) => Promise<Property | null> = async (id) => {
+    return await prisma.property.findUnique({
+        where: {
+        id,
+        },
+    });
+    };
+
+export const deletePropertyById = async (id: string) => {
+    return await prisma.property.delete({
+        where: {
+        id,
+        },
+    });
+    }
+
 export const getPropertiesByTicker: (ticker: string) => Promise<Property[]> = async (ticker) => {
   return await prisma.property.findMany({
     where: {

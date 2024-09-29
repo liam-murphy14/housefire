@@ -64,8 +64,8 @@ async def main():
 
         housefire_api = HousefireAPI(HOUSEFIRE_API_KEY)
 
-        housefire_api.delete_properties_by_ticker(ticker.upper())
-        housefire_api.post_properties(df_to_request(transformed_dataframe))
+        created_properties = housefire_api.update_properties_by_ticker(ticker.upper(), df_to_request(transformed_dataframe))
+        logger.info(f"Created properties: {created_properties}")
 
     finally:
         driver.stop()

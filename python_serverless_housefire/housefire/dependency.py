@@ -80,6 +80,14 @@ class HousefireAPI:
             raise Exception(f"unexpected error deleting properties for ticker {ticker}: {r}")
         return r.json()["count"]
 
+    def delete_property_by_id(self, property_id: str):
+        """
+        deletes a property by ID, raising an exception if an unexpected error occurs
+        """
+        r = self._delete(f"/properties/{property_id}")
+        if _is_error_response(r):
+            raise Exception(f"unexpected error deleting property {property_id}: {r}")
+
     def post_properties(self, data: list[dict]) -> list[dict]:
         """
         creates many properties, returning a list of the created properties,
@@ -93,6 +101,28 @@ class HousefireAPI:
         elif _is_error_response(r):
             raise Exception(f"unexpected error creating properties: {r}")
         return list(r.json())
+
+    def update_properties_by_ticker(self, ticker: str, data: list[dict]) -> list[dict]:
+        """
+        updates many properties for a given ticker, returning a list of the updated properties,
+        raising an exception in the case of a validation error, or any other unexpected error
+        """
+        if data is None or len(data) == 0:
+            raise Exception("data must be a non-empty list of property objects")
+        existing_properties = self.get_properties_by_ticker(ticker)
+        existing_property_dict_by_addressInput = { p["addressInput"]: p for p in existing_properties }
+        new_property_address_input_set = { p["addressInput"] for p in data }
+        
+        to_create = list()
+        for new_property in data:
+            if new_property["addressInput"] in existing_property_dict_by_addressInput:
+                continue
+            to_create.append(new_property)
+        for existing_property in existing_properties:
+            if existing_property["addressInput"] in new_property_address_input_set:
+                continue
+            self.delete_property_by_id(existing_property["id"])
+        return self.post_properties(to_create)
 
     def get_geocode_by_address_input(self, address_input: str) -> dict | None:
         """
