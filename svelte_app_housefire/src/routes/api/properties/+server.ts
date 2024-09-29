@@ -7,6 +7,7 @@ import { ZodError } from 'zod';
 export const POST: RequestHandler = async ({ request }) => {
   try {
     const body = await request.json();
+    console.log('received POST request to /api/properties: ', body);
     const propertiesCreateManyInput = PropertyCreateManyArgsSchema.parse({ data: body }).data;
     const propertiesCreatePrismaResponse = await createManyProperties(propertiesCreateManyInput);
     return json(propertiesCreatePrismaResponse);
