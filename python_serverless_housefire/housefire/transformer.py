@@ -5,7 +5,6 @@ from housefire.logger import get_logger
 from housefire.utils import (
     get_env_nonnull,
     parse_and_convert_area,
-    df_to_request,
     parse_area_string,
     housefire_geocode_to_housefire_address,
 )
@@ -19,6 +18,20 @@ google_geocode_api_client = GoogleGeocodeAPI(
 )
 
 logger = get_logger(__name__)
+
+def _geocode_transform(df: pd.DataFrame) -> pd.DataFrame:
+    address_inputs = df["address"].to_list()
+    df.drop(columns=["address"], inplace=True)
+    records = df.to_dict(orient="records")
+    housefire_geocodes = google_geocode_api_client.geocode_addresses(address_inputs)
+    for address_input, record in zip(address_inputs, records):
+        record["addressInput"] = address_input
+        if address_input not in housefire_geocodes:
+            logger.error(f"Failed to geocode address: {address_input}")
+            continue
+        housefire_geocode = housefire_geocodes[address_input]
+        record.update(housefire_geocode_to_housefire_address(housefire_geocode))
+    return pd.DataFrame(records)
 
 PLD_UNNECESSARY_COLUMNS = [
     "Available Date",
@@ -88,31 +101,20 @@ def _pld_transform(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _eqix_transform(df: pd.DataFrame) -> pd.DataFrame:
-    return df
+    return _geocode_transform(df)
 
 
 def _welltower_transform(df: pd.DataFrame) -> pd.DataFrame:
-    return df
+    return _geocode_transform(df)
 
 
 def _simon_transform(df: pd.DataFrame) -> pd.DataFrame:
-    return df
+    return _geocode_transform(df)
 
 
 def _digital_realty_transform(df: pd.DataFrame) -> pd.DataFrame:
     df["squareFootage"] = df["squareFootage"].apply(parse_area_string)
-    address_inputs = df["address"].to_list()
-    df.drop(columns=["address"], inplace=True)
-    records = df.to_dict(orient="records")
-    housefire_geocodes = google_geocode_api_client.geocode_addresses(address_inputs)
-    for address_input, record in zip(address_inputs, records):
-        record["addressInput"] = address_input
-        if address_input not in housefire_geocodes:
-            logger.error(f"Failed to geocode address: {address_input}")
-            continue
-        housefire_geocode = housefire_geocodes[address_input]
-        record.update(housefire_geocode_to_housefire_address(housefire_geocode))
-    return pd.DataFrame(records)
+    return _geocode_transform(df)
 
 
 TRANSFORMERS = {

@@ -164,11 +164,7 @@ async def _eqix_scrape_single_property(tab: uc.Tab) -> pd.DataFrame:
     return pd.DataFrame(
         {
             "name": [name],
-            "address": [address],
-            "city": [city],
-            "state": [state],
-            "zip": [zip_code],
-            "country": [country],
+            "address": [f"{address}, {city}, {state}, {zip_code}, {country}"],
         }
     )
 
@@ -220,11 +216,7 @@ async def _welltower_scrape_single_property(tab: uc.Tab) -> pd.DataFrame:
     return pd.DataFrame(
         {
             "name": [name],
-            "address": [address_line_1],
-            "city": [city],
-            "state": [state],
-            "zip": [None],
-            "country": [country],
+            "address": [f"{address_line_1}, {city}, {state}, {country}"],
         }
     )
 
@@ -288,19 +280,12 @@ async def _simon_scrape_single_property_us(
     """
 
     name = name_string.strip()
-    address_parts = location_string.split(",")
-    city = address_parts[0].strip()
-    state = address_parts[1].strip()
     country = "United States of America"
 
     return pd.DataFrame(
         {
             "name": [name],
-            "address": [None],
-            "city": [city],
-            "state": [state],
-            "zip": [None],
-            "country": [country],
+            "address": [f"{location_string}, {country}"],
         }
     )
 
@@ -313,22 +298,11 @@ async def _simon_scrape_single_property_international(
     """
 
     name = name_string.strip()
-    address_parts = location_string.split(",")
-    city = address_parts[0].strip()
-    state = None
-    country = address_parts[-1].strip()
-
-    if len(address_parts) > 2:
-        state = address_parts[-2].strip()
 
     return pd.DataFrame(
         {
             "name": [name],
-            "address": [None],
-            "city": [city],
-            "state": [state],
-            "zip": [None],
-            "country": [country],
+            "address": [location_string],
         }
     )
 
@@ -414,40 +388,40 @@ if __name__ == "__main__":
         browser = await uc.start()
 
         # EQIX
-        # tab = await browser.get(
-        #     "https://www.equinix.com/data-centers/asia-pacific-colocation/australia-colocation/brisbane-data-centers/br1"
-        # )
-        # df = await _eqix_scrape_single_property(tab)
-        # print("SCRAPED ONE ADDRESS LINE DF")
-        # print(df)
-        # print("\n\n\n")
+        tab = await browser.get(
+            "https://www.equinix.com/data-centers/asia-pacific-colocation/australia-colocation/brisbane-data-centers/br1"
+        )
+        df = await _eqix_scrape_single_property(tab)
+        print("SCRAPED ONE ADDRESS LINE DF")
+        print(df)
+        print("\n\n\n")
 
-        # tab = await browser.get(
-        #     "https://www.equinix.com/data-centers/americas-colocation/united-states-colocation/chicago-data-centers/ch2"
-        # )
-        # df = await _eqix_scrape_single_property(tab)
-        # print("SCRAPED TWO ADDRESS LINE DF")
-        # print(df)
-        # print("\n\n\n")
+        tab = await browser.get(
+            "https://www.equinix.com/data-centers/americas-colocation/united-states-colocation/chicago-data-centers/ch2"
+        )
+        df = await _eqix_scrape_single_property(tab)
+        print("SCRAPED TWO ADDRESS LINE DF")
+        print(df)
+        print("\n\n\n")
 
-        # tab = await browser.get("https://www.equinix.com/data-centers")
-        # print("SCRAPED CITY URLS")
-        # print(await _eqix_scrape_city_urls(tab))
-        # print("\n\n\n")
+        tab = await browser.get("https://www.equinix.com/data-centers")
+        print("SCRAPED CITY URLS")
+        print(await _eqix_scrape_city_urls(tab))
+        print("\n\n\n")
 
-        # tab = await browser.get(
-        #     "https://www.equinix.com/data-centers/americas-colocation/canada-colocation/calgary-data-centers"
-        # )
-        # print("SCRAPED MULTIPLE PROPERTY URLS")
-        # print(await _eqix_scrape_single_city_property_urls(tab))
-        # print("\n\n\n")
+        tab = await browser.get(
+            "https://www.equinix.com/data-centers/americas-colocation/canada-colocation/calgary-data-centers"
+        )
+        print("SCRAPED MULTIPLE PROPERTY URLS")
+        print(await _eqix_scrape_single_city_property_urls(tab))
+        print("\n\n\n")
 
-        # tab = await browser.get(
-        #     "https://www.equinix.com/data-centers/asia-pacific-colocation/australia-colocation/brisbane-data-centers"
-        # )
-        # print("SCRAPED SINGLE PROPERTY URL")
-        # print(await _eqix_scrape_single_city_property_urls(tab))
-        # print("\n\n\n")
+        tab = await browser.get(
+            "https://www.equinix.com/data-centers/asia-pacific-colocation/australia-colocation/brisbane-data-centers"
+        )
+        print("SCRAPED SINGLE PROPERTY URL")
+        print(await _eqix_scrape_single_city_property_urls(tab))
+        print("\n\n\n")
 
         # WELL welltower scrape property links
         # tab = await browser.get("https://medicaloffice.welltower.com/search?address=USA&min=null&max=null&moveInTiming=")
@@ -475,10 +449,10 @@ if __name__ == "__main__":
         # print(await _simon_scrape(browser))
 
         # DIGITAL REALTY
-        tab = await browser.get(
-            "https://www.digitalrealty.com/data-centers/americas/chicago"
-        )
-        df = await _digital_realty_scrape_single_region(tab)
-        print(df)
+        # tab = await browser.get(
+        #     "https://www.digitalrealty.com/data-centers/americas/chicago"
+        # )
+        # df = await _digital_realty_scrape_single_region(tab)
+        # print(df)
 
     uc.loop().run_until_complete(main())

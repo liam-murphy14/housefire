@@ -6,7 +6,6 @@ from housefire.scraper import (
 )
 from housefire.transformer import (
     TRANSFORMERS,
-    df_to_request,
     transform_wrapper,
 )
 import nodriver as uc
@@ -14,6 +13,7 @@ from housefire.utils import (
     get_env_nonnull_dir,
     get_env_nonnull_file,
     get_env_nonnull,
+    df_to_request,
 )
 from housefire.dependency import HousefireAPI
 from housefire.logger import get_logger
