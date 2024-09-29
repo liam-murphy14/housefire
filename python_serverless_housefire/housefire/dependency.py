@@ -122,6 +122,7 @@ class HousefireAPI:
             if existing_property["addressInput"] in new_property_address_input_set:
                 continue
             self.delete_property_by_id(existing_property["id"])
+            time.sleep(1)
         return self.post_properties(to_create)
 
     def get_geocode_by_address_input(self, address_input: str) -> dict | None:
