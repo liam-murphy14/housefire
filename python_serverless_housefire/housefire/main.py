@@ -1,5 +1,6 @@
 import sys
 import dotenv
+dotenv.load_dotenv()
 from housefire.scraper import (
     SCRAPERS,
     scrape_wrapper,
@@ -18,6 +19,7 @@ from housefire.utils import (
 from housefire.dependency import HousefireAPI
 from housefire.logger import get_logger
 
+
 logger = get_logger(__name__)
 
 
@@ -34,8 +36,6 @@ async def get_chromedriver_instance() -> uc.Browser:
 
 
 async def main():
-
-    dotenv.load_dotenv()
 
     TEMP_DIR_PATH = get_env_nonnull_dir("TEMP_DIR_PATH")
 
