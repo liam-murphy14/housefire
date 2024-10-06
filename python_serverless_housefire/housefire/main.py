@@ -30,7 +30,7 @@ async def get_chromedriver_instance() -> uc.Browser:
     CHROME_PATH = get_env_nonnull_file("CHROME_PATH")
 
     return await uc.start(
-        headless=True,
+        headless=False,
         browser_executable_path=CHROME_PATH,
     )
 

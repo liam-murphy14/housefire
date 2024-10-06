@@ -26,7 +26,9 @@
                 ]
               )
             )
+            # extra non-darwin dependencies
             (if (!pkgs.stdenv.isDarwin) then pkgs.chromium else null)
+            (if (!pkgs.stdenv.isDarwin) then pkgs.xvfb-run else null)
           ];
 
           shellHook = (pkgs.lib.optionalString (!pkgs.stdenv.isDarwin) ''
