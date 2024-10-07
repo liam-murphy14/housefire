@@ -229,24 +229,23 @@ async def _simon_scrape(driver: uc.Browser) -> pd.DataFrame:
     time.sleep(jiggle_time)
     international_tab = await driver.get(international_start_url, new_tab=True)
 
-    us_link_name_location_tuples = await _simon_scrape_property_mall(us_tab)
-    international_link_name_location_tuples = await _simon_scrape_property_mall(
-        international_tab
-    )
+    links, names, locations = await _simon_scrape_property_mall(us_tab)
+    int_links, int_names, int_locations = await _simon_scrape_property_mall(international_tab)
+    links.extend(int_links)
+    names.extend(int_names)
+    locations.extend(int_locations)
 
-    us_df_list = [
-        await _simon_scrape_single_property_us(name, location)
-        for _, name, location in us_link_name_location_tuples
-    ]
-    international_df_list = [
-        await _simon_scrape_single_property_international(name, location)
-        for _, name, location in international_link_name_location_tuples
-    ]
+    geo_addresses = [f"{name}, {location}" for name, location in zip(names, locations)]
 
-    return pd.concat(us_df_list + international_df_list)
+    return pd.DataFrame(
+            {
+                "name": names,
+                "address": geo_addresses,
+                }
+            )
 
 
-async def _simon_scrape_property_mall(tab: uc.Tab) -> list[tuple[str, str, str]]:
+async def _simon_scrape_property_mall(tab: uc.Tab) -> tuple[list[str], list[str], list[str]]:
     """
     Scrape the property links, names, and locations from the simon mall page
     returns tuple of (link, name, location)
@@ -269,42 +268,7 @@ async def _simon_scrape_property_mall(tab: uc.Tab) -> list[tuple[str, str, str]]
     ]
     logger.debug(f"found property locations: {property_locations}")
 
-    return zip(property_links, property_names, property_locations)
-
-
-async def _simon_scrape_single_property_us(
-    name_string: str, location_string: str
-) -> pd.DataFrame:
-    """
-    Scrape the name and address of a single property
-    """
-
-    name = name_string.strip()
-    country = "United States of America"
-
-    return pd.DataFrame(
-        {
-            "name": [name],
-            "address": [f"{location_string}, {country}"],
-        }
-    )
-
-
-async def _simon_scrape_single_property_international(
-    name_string: str, location_string: str
-) -> pd.DataFrame:
-    """
-    Scrape the name and address of a single property
-    """
-
-    name = name_string.strip()
-
-    return pd.DataFrame(
-        {
-            "name": [name],
-            "address": [location_string],
-        }
-    )
+    return property_links, property_names, property_locations
 
 
 async def _digital_realty_scrape(
