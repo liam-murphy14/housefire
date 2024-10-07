@@ -1,5 +1,5 @@
-import { deletePropertyById, getPropertyById } from "$lib/server/db/propertyQueries";
-import { error, json, type RequestHandler } from "@sveltejs/kit";
+import { deletePropertyById, getPropertyById } from '$lib/server/db/propertyQueries';
+import { error, json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async ({ params }) => {
   console.log('received GET request to /api/property/[id] with params: ', params);
