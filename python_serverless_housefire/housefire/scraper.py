@@ -230,7 +230,9 @@ async def _simon_scrape(driver: uc.Browser) -> pd.DataFrame:
     international_tab = await driver.get(international_start_url, new_tab=True)
 
     links, names, locations = await _simon_scrape_property_mall(us_tab)
-    int_links, int_names, int_locations = await _simon_scrape_property_mall(international_tab)
+    int_links, int_names, int_locations = await _simon_scrape_property_mall(
+        international_tab
+    )
     links.extend(int_links)
     names.extend(int_names)
     locations.extend(int_locations)
@@ -238,14 +240,16 @@ async def _simon_scrape(driver: uc.Browser) -> pd.DataFrame:
     geo_addresses = [f"{name}, {location}" for name, location in zip(names, locations)]
 
     return pd.DataFrame(
-            {
-                "name": names,
-                "address": geo_addresses,
-                }
-            )
+        {
+            "name": names,
+            "address": geo_addresses,
+        }
+    )
 
 
-async def _simon_scrape_property_mall(tab: uc.Tab) -> tuple[list[str], list[str], list[str]]:
+async def _simon_scrape_property_mall(
+    tab: uc.Tab,
+) -> tuple[list[str], list[str], list[str]]:
     """
     Scrape the property links, names, and locations from the simon mall page
     returns tuple of (link, name, location)

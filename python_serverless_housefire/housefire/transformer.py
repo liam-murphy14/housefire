@@ -19,6 +19,7 @@ google_geocode_api_client = GoogleGeocodeAPI(
 
 logger = get_logger(__name__)
 
+
 def _geocode_transform(df: pd.DataFrame) -> pd.DataFrame:
     address_inputs = df["address"].to_list()
     df.drop(columns=["address"], inplace=True)
@@ -32,6 +33,7 @@ def _geocode_transform(df: pd.DataFrame) -> pd.DataFrame:
         housefire_geocode = housefire_geocodes[address_input]
         record.update(housefire_geocode_to_housefire_address(housefire_geocode))
     return pd.DataFrame(records)
+
 
 PLD_UNNECESSARY_COLUMNS = [
     "Available Date",

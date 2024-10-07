@@ -1,5 +1,6 @@
 import sys
 import dotenv
+
 dotenv.load_dotenv()
 from housefire.scraper import (
     SCRAPERS,
@@ -64,7 +65,9 @@ async def main():
 
         housefire_api = HousefireAPI(HOUSEFIRE_API_KEY)
 
-        created_properties = housefire_api.update_properties_by_ticker(ticker.upper(), df_to_request(transformed_dataframe))
+        created_properties = housefire_api.update_properties_by_ticker(
+            ticker.upper(), df_to_request(transformed_dataframe)
+        )
         logger.info(f"Created properties: {created_properties}")
 
     finally:
