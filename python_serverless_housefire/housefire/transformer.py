@@ -4,6 +4,7 @@ from housefire.dependency import HousefireAPI, GoogleGeocodeAPI
 from housefire.logger import get_logger
 from housefire.utils import (
     get_env_nonnull,
+    df_to_request,
     parse_and_convert_area,
     parse_area_string,
     housefire_geocode_to_housefire_address,
@@ -138,6 +139,9 @@ def transform_wrapper(data: pd.DataFrame, ticker: str) -> pd.DataFrame:
     transformed_data.fillna(np.nan, inplace=True)
     transformed_data.replace([np.nan], [None], inplace=True)
     transformed_data_with_ticker = transformed_data.assign(reitTicker=ticker.upper())
+    duplicates = transformed_data_with_ticker.duplicated(subset="addressInput")
+    logger.debug(f"Dropping duplicates: {duplicates}")
+    transformed_data_with_ticker.drop_duplicates(inplace=True, subset="addressInput")
     logger.debug(
         f"Transformed data for REIT: {ticker}, df: {transformed_data_with_ticker}"
     )
@@ -147,9 +151,9 @@ def transform_wrapper(data: pd.DataFrame, ticker: str) -> pd.DataFrame:
 if __name__ == "__main__":
 
     # HOUSEFIRE TEST
-    # dotenv.load_dotenv()
-
-    # HOUSEFIRE_API_KEY = get_env_nonnull("HOUSEFIRE_API_KEY")
+    dotenv.load_dotenv()
+    
+    HOUSEFIRE_API_KEY = get_env_nonnull("HOUSEFIRE_API_KEY")
 
     # api = HousefireAPI(HOUSEFIRE_API_KEY)
     # api.base_url = "http://localhost:5173/api/"
@@ -161,11 +165,22 @@ if __name__ == "__main__":
 
     # GOOGLE MAPS TEST
 
-    realty_df = pd.DataFrame(
-        {
-            "name": ["Chicago CH2"],
-            "address": ["2200 Busse Road, Elk Grove Village, IL 60007"],
-            "squareFootage": ["485,000"],
-        }
+    # realty_df = pd.DataFrame(
+    #     {
+    #         "name": ["Chicago CH2"],
+    #         "address": ["2200 Busse Road, Elk Grove Village, IL 60007"],
+    #         "squareFootage": ["485,000"],
+    #     }
+    # )
+    # print(_digital_realty_transform(realty_df))
+    properties_dataframe = pd.read_csv("/Users/liammurphy/Downloads/Data_export.csv")
+    ticker = "pld"
+    transformed_dataframe = transform_wrapper(properties_dataframe, ticker)
+    logger.debug(f"Transformed properties data: {transformed_dataframe}")
+
+    housefire_api = HousefireAPI(HOUSEFIRE_API_KEY, base_url="http://localhost:5173/api/")
+
+    created_properties = housefire_api.update_properties_by_ticker(
+        ticker.upper(), df_to_request(transformed_dataframe)
     )
-    print(_digital_realty_transform(realty_df))
+    logger.info(f"Created properties: {created_properties}")
