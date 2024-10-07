@@ -18,6 +18,7 @@ export const POST: RequestHandler = async ({ request }) => {
         message: zodErrorMessages,
       });
     }
+    console.error('Error in POST /api/properties: ', e);
     error(500, {
       message: 'Something went wrong',
     });

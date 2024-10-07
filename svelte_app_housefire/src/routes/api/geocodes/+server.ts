@@ -30,6 +30,7 @@ export const GET: RequestHandler = async ({ url }) => {
         message: zodErrorMessages,
       });
     }
+    console.error('Error in GET /api/geocodes: ', e);
     error(500, {
       message: 'Something went wrong',
     });
@@ -50,6 +51,7 @@ export const POST: RequestHandler = async ({ request }) => {
         message: zodErrorMessages,
       });
     }
+    console.error('Error in POST /api/geocodes: ', e);
     error(500, {
       message: 'Something went wrong',
     });
